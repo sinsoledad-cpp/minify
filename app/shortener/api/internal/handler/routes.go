@@ -18,20 +18,20 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 创建新的短链接
 				Method:  http.MethodPost,
-				Path:    "/urls",
+				Path:    "/create",
 				Handler: shortener.CreateShortUrlHandler(serverCtx),
-			},
-			{
-				// 获取当前用户的所有短链接
-				Method:  http.MethodGet,
-				Path:    "/urls",
-				Handler: shortener.ListMyShortUrlsHandler(serverCtx),
 			},
 			{
 				// 获取单个短链接的详细信息和统计数据
 				Method:  http.MethodGet,
-				Path:    "/urls/:shortKey",
+				Path:    "/detail/:shortKey",
 				Handler: shortener.GetShortUrlDetailHandler(serverCtx),
+			},
+			{
+				// 获取当前用户的所有短链接
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: shortener.ListMyShortUrlsHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

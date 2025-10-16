@@ -93,7 +93,7 @@ func (l *CreateShortUrlLogic) CreateShortUrl(req *types.CreateShortUrlReq) (resp
 	if req.ExpiresAt != "" {
 		expTime, err := time.Parse(time.RFC3339, req.ExpiresAt)
 		if err != nil {
-			return nil, errors.Wrap(err, "过期时间格式无效，请使用RFC3339格式")
+			return nil, errors.Wrap(err, "过期时间格式无效,请使用RFC3339格式")
 		}
 		expiresAt = sql.NullTime{
 			Time:  expTime,

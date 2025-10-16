@@ -73,15 +73,15 @@ type (
 service Shortener {
 	@doc "创建新的短链接"
 	@handler CreateShortUrl
-	post /urls (CreateShortUrlReq) returns (CreateShortUrlResp)
+	post /create (CreateShortUrlReq) returns (CreateShortUrlResp)
 
 	@doc "获取当前用户的所有短链接"
 	@handler ListMyShortUrls
-	get /urls returns (ListShortUrlsResp)
+	get /list returns (ListShortUrlsResp)
 
 	@doc "获取单个短链接的详细信息和统计数据"
 	@handler GetShortUrlDetail
-	get /urls/:shortKey (GetShortUrlDetailReq) returns (GetShortUrlDetailResp)
+	get /detail/:shortKey (GetShortUrlDetailReq) returns (GetShortUrlDetailResp)
 }
 
 // 无需认证的服务组 (重定向服务)
