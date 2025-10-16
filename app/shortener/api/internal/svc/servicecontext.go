@@ -11,14 +11,18 @@ import (
 )
 
 type ServiceContext struct {
-	Config         config.Config
-	ShortUrlsModel shortener.ShortUrlsModel
+	Config               config.Config
+	ShortUrlsModel       shortener.ShortUrlsModel
+	AggDailySummaryModel shortener.AggDailySummaryModel
+	UrlAnalyticsModel    shortener.UrlAnalyticsModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	conn := sqlx.NewMysql(c.DB.DataSource)
 	return &ServiceContext{
-		Config:         c,
-		ShortUrlsModel: shortener.NewShortUrlsModel(conn),
+		Config:               c,
+		ShortUrlsModel:       shortener.NewShortUrlsModel(conn),
+		AggDailySummaryModel: shortener.NewAggDailySummaryModel(conn),
+		UrlAnalyticsModel:    shortener.NewUrlAnalyticsModel(conn),
 	}
 }

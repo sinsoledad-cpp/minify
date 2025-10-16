@@ -10,4 +10,4 @@ DB:
 Auth:
   AccessSecret: your-jwt-secret-key-here-change-in-production
   AccessExpire: 86400  # 24小时过期
-ShortDomain: "localhost:8887"
+ShortDomain: "http://192.168.48.1:8887"

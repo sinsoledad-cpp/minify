@@ -4,6 +4,7 @@
 package shortener
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -21,12 +22,15 @@ func RedirectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := shortener.NewRedirectLogic(r.Context(), svcCtx)
+		// 将请求和响应写入上下文，以便在逻辑层中使用
+		ctx := context.WithValue(r.Context(), "request", r)
+		ctx = context.WithValue(ctx, "response", w)
+
+		l := shortener.NewRedirectLogic(ctx, svcCtx)
 		err := l.Redirect(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.Ok(w)
 		}
+		// 注意：不调用 httpx.Ok(w)，因为重定向已经在逻辑层处理
 	}
 }
