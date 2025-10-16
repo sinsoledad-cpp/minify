@@ -1,4 +1,5 @@
 goctl api go -api app/user/api/user.api -dir app/user/api -style gozero 
+goctl api go -api app/shortener/api/shortener.api -dir app/shortener/api -style gozero 
 goctl rpc protoc protos/user/v1/user.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/user/rpc -c gen/go/user --style gozero 
 goctl rpc protoc protos/user/v1/user.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/user/rpc --style=gozero  -c gen/go/user
 goctl rpc protoc protos/user/v1/user.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/user/rpc --style=gozero -c ./gen/go/user
