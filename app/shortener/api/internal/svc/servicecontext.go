@@ -5,10 +5,12 @@ package svc
 
 import (
 	"lucid/app/shortener/api/internal/config"
+	"lucid/data/model/shortener"
 )
 
 type ServiceContext struct {
 	Config config.Config
+	ShortUrlsModel shortener.ShortUrlsModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
