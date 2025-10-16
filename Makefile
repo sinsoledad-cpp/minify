@@ -5,7 +5,13 @@ goctl rpc protoc protos/user/v1/user.proto --go_out=. --go-grpc_out=. --zrpc_out
 
 goctl model mysql ddl -src="schema/sql/user/001_create_users_table.sql" -dir="data/model/user"
 goctl model mysql ddl -src="schema/sql/shortener/000001_create_short_urls_table.up.sql" -dir="data/model/shortener"
+goctl model mysql ddl -src="schema/sql/shortener/000002_url_analytics_table.up.sql" -dir="data/model/shortener"
+goctl model mysql ddl -src="schema/sql/shortener/000003_agg_daily_summary_table.up.sql" -dir="data/model/shortener"
+goctl model mysql ddl -src="schema/sql/shortener/000001_create_url_analytics_table.up.sql" -dir="data/model/shortener"
 
+
+migrate  create -ext sql -dir schema/sql/shortener -seq agg_daily_summary_table
+migrate  create -ext sql -dir schema/sql/shortener -seq url_analytics_table
 migrate  create -ext sql -dir schema/sql/user -seq create_users_table
 shortener
 migrate  create -ext sql -dir schema/sql/shortener -seq create_short_urls_table
