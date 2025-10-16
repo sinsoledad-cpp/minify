@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "gen/go/user/v1";
+
+// 用户服务
+service User {
+  // 根据用户ID获取用户信息
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+}
+
+// -- 消息体定义 --
+
+message GetUserInfoRequest {
+  int64 user_id = 1;
+}
+
+message UserInfo {
+  int64 id = 1;
+  string username = 2;
+  string created_at = 3;
+}
+
+message GetUserInfoResponse {
+  UserInfo user = 1;
+}
