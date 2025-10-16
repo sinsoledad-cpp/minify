@@ -1,0 +1,97 @@
+syntax = "v1"
+
+info (
+	title:   "短链接服务 - 缩短器模块API"
+	desc:    "提供短链接的创建、管理、统计和重定向功能"
+	author:  "Lucid Team"
+	version: "v1.0.0"
+)
+
+// --- 数据结构定义 ---
+type (
+	// 创建短链接的请求
+	CreateShortUrlReq {
+		OriginalUrl string `json:"originalUrl" validate:"required,url"` // 原始长链接
+		ExpiresAt   string `json:"expiresAt,optional"` // 过期时间 (RFC3339格式, e.g., "2025-12-31T23:59:59Z"), 为空表示永不过期
+	}
+	// 创建短链接的响应
+	CreateShortUrlResp {
+		ShortKey    string `json:"shortKey"` // 生成的短链接Key
+		OriginalUrl string `json:"originalUrl"` // 原始长链接
+		ShortUrl    string `json:"shortUrl"` // 完整的短链接访问地址
+	}
+	// 短链接基本信息
+	ShortUrlInfo {
+		ShortKey       string `json:"shortKey"` // 短链接Key
+		OriginalUrl    string `json:"originalUrl"` // 原始长链接
+		ShortUrl       string `json:"shortUrl"` // 完整的短链接访问地址
+		CreatedAt      string `json:"createdAt"` // 创建时间
+		ExpiresAt      string `json:"expiresAt"` // 过期时间, 为空表示永不过期
+		TotalClicks    int64  `json:"totalClicks"` // 总点击量
+		UniqueVisitors int64  `json:"uniqueVisitors"` // 独立访客数
+	}
+	// 获取用户短链接列表的响应
+	ListShortUrlsResp {
+		Urls []ShortUrlInfo `json:"urls"` // 短链接列表
+	}
+	// 获取单个短链接详情的请求 (通过URL路径参数传递)
+	GetShortUrlDetailReq {
+		ShortKey string `path:"shortKey"` // 短链接Key
+	}
+	// 单个访问记录
+	AnalyticsRecord {
+		IpAddress string `json:"ipAddress"` // 访客IP
+		UserAgent string `json:"userAgent"` // User-Agent
+		Referer   string `json:"referer"` // 来源
+		CreatedAt string `json:"createdAt"` // 访问时间
+	}
+	// 获取单个短链接详情的响应
+	GetShortUrlDetailResp {
+		Info          ShortUrlInfo      `json:"info"` // 基本信息
+		DailySummary  []DailySummary    `json:"dailySummary"` // 每日统计
+		RecentRecords []AnalyticsRecord `json:"recentRecords"` // 最近访问记录 (示例，比如最近20条)
+	}
+	// 每日统计
+	DailySummary {
+		Date           string `json:"date"` // 统计日期 (YYYY-MM-DD)
+		TotalClicks    int64  `json:"totalClicks"` // 当日总点击量
+		UniqueVisitors int64  `json:"uniqueVisitors"` // 当日独立访客数
+	}
+	// 短链接重定向请求 (从URL路径中获取shortKey)
+	RedirectReq {
+		ShortKey string `path:"shortKey"`
+	}
+)
+
+// --- API服务定义 ---
+// 需要认证的服务组 (管理API)
+@server (
+	prefix: /api/v1/shortener
+	group:  shortener
+	jwt:    Auth // 引用user.api中定义的jwt认证
+)
+service Shortener {
+	@doc "创建新的短链接"
+	@handler CreateShortUrl
+	post /urls (CreateShortUrlReq) returns (CreateShortUrlResp)
+
+	@doc "获取当前用户的所有短链接"
+	@handler ListMyShortUrls
+	get /urls returns (ListShortUrlsResp)
+
+	@doc "获取单个短链接的详细信息和统计数据"
+	@handler GetShortUrlDetail
+	get /urls/:shortKey (GetShortUrlDetailReq) returns (GetShortUrlDetailResp)
+}
+
+// 无需认证的服务组 (重定向服务)
+// 这个服务会处理类似 http://your.domain/:shortKey 的请求
+@server (
+	group: shortener
+)
+service Shortener {
+	@doc "短链接重定向"
+	@handler Redirect
+	get /:shortKey (RedirectReq)
+}
+
