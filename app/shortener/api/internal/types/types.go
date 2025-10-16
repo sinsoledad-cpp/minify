@@ -12,7 +12,7 @@ type AnalyticsRecord struct {
 
 type CreateShortUrlReq struct {
 	OriginalUrl string `json:"originalUrl" validate:"required,url"` // 原始长链接
-	ExpiresAt   string `json:"expiresAt,optional"`                  // 过期时间 (RFC3339格式, e.g., "2025-12-31T23:59:59Z"), 为空表示永不过期
+	ExpiresIn   string `json:"expiresIn,optional"`                  //
 }
 
 type CreateShortUrlResp struct {

@@ -12,7 +12,7 @@ type (
 	// 创建短链接的请求
 	CreateShortUrlReq {
 		OriginalUrl string `json:"originalUrl" validate:"required,url"` // 原始长链接
-		ExpiresIn   string `json:"expiresIn,optional"` // 
+		ExpiresIn   string `json:"expiresIn,optional"` //
 	}
 	// 创建短链接的响应
 	CreateShortUrlResp {

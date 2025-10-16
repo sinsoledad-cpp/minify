@@ -10,6 +10,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"lucid/app/shortener/api/internal/svc"
@@ -90,11 +92,13 @@ func (l *CreateShortUrlLogic) CreateShortUrl(req *types.CreateShortUrlReq) (resp
 
 	// 8. 处理过期时间
 	var expiresAt sql.NullTime
-	if req.ExpiresAt != "" {
-		expTime, err := time.Parse(time.RFC3339, req.ExpiresAt)
+	if req.ExpiresIn != "" {
+		duration, err := parseDuration(req.ExpiresIn)
 		if err != nil {
-			return nil, errors.Wrap(err, "过期时间格式无效,请使用RFC3339格式")
+			return nil, errors.Wrap(err, "无效的有效期格式")
 		}
+		// 计算绝对过期时间
+		expTime := time.Now().Add(duration)
 		expiresAt = sql.NullTime{
 			Time:  expTime,
 			Valid: true,
@@ -125,4 +129,20 @@ func (l *CreateShortUrlLogic) CreateShortUrl(req *types.CreateShortUrlReq) (resp
 		OriginalUrl: req.OriginalUrl,
 		ShortUrl:    fmt.Sprintf("%s/%s", l.svcCtx.Config.ShortDomain, shortKey),
 	}, nil
+}
+
+// parseDuration 解析支持 "d" (天) 的时间段字符串
+func parseDuration(s string) (time.Duration, error) {
+	s = strings.TrimSpace(s)
+	if strings.HasSuffix(s, "d") {
+		daysStr := strings.TrimSuffix(s, "d")
+		days, err := strconv.Atoi(daysStr)
+		if err != nil {
+			return 0, err
+		}
+		// 将天数转换为小时，以便 time.ParseDuration 处理
+		return time.ParseDuration(fmt.Sprintf("%dh", days*24))
+	}
+	// 对于其他单位 (h, m, s), 直接使用标准库函数
+	return time.ParseDuration(s)
 }
