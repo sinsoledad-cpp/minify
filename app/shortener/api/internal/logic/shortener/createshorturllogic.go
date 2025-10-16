@@ -52,7 +52,7 @@ func (l *CreateShortUrlLogic) CreateShortUrl(req *types.CreateShortUrlReq) (resp
 		return nil, errors.Wrap(err, "URL解析失败")
 	}
 	if !valid {
-		return nil, errors.New("无效的URL格式，必须是有效的http或https URL")
+		return nil, errors.New("无效的URL格式,必须是有效的http或https URL")
 	}
 
 	// 3. 检查是否是短链接

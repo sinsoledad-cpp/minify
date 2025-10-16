@@ -6,6 +6,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"lucid/app/shortener/api/internal/config"
 	"lucid/app/shortener/api/internal/handler"
@@ -19,6 +20,7 @@ var configFile = flag.String("f", "etc/shortener.yaml", "the config file")
 
 func main() {
 	flag.Parse()
+	time.Local, _ = time.LoadLocation("Asia/Shanghai")
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)

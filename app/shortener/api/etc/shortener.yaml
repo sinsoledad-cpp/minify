@@ -6,7 +6,7 @@ Log:
   Mode: console    # 输出模式 (console 或 file)
   Stat: false    # (在某些版本中) 可以尝试设置Stat为false来关闭统计日志
 DB:
-  DataSource: root:root@tcp(localhost:3306)/lucid?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  DataSource: "root:root@tcp(localhost:3306)/lucid?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
 Auth:
   AccessSecret: your-jwt-secret-key-here-change-in-production
   AccessExpire: 86400  # 24小时过期
