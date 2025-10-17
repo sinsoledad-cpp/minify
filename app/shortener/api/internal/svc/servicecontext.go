@@ -11,10 +11,10 @@ import (
 )
 
 type ServiceContext struct {
-	Config               config.Config
-	ShortUrlsModel       shortener.ShortUrlsModel
-	AggDailySummaryModel shortener.AggDailySummaryModel
+	Config         config.Config
+	ShortUrlsModel shortener.ShortUrlsModel
 	UrlAnalyticsModel    shortener.UrlAnalyticsModel
+	AggDailySummaryModel shortener.AggDailySummaryModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -22,7 +22,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:               c,
 		ShortUrlsModel:       shortener.NewShortUrlsModel(conn),
-		AggDailySummaryModel: shortener.NewAggDailySummaryModel(conn),
 		UrlAnalyticsModel:    shortener.NewUrlAnalyticsModel(conn),
+		AggDailySummaryModel: shortener.NewAggDailySummaryModel(conn),
 	}
 }
