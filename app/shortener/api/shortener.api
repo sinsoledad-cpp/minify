@@ -30,6 +30,16 @@ type (
 		TotalClicks    int64  `json:"totalClicks"` // 总点击量
 		UniqueVisitors int64  `json:"uniqueVisitors"` // 独立访客数
 	}
+	// 分页获取用户短链接列表的请求
+	ListPageMyShortUrlsReq {
+		Page     int `form:"page,default=1"` // 页码，默认为1
+		PageSize int `form:"pageSize,default=20"` // 每页数量，默认为20
+	}
+	// 分页获取用户短链接列表的响应
+	ListPageMyShortUrlsResp {
+		Urls  []ShortUrlInfo `json:"urls"` // 当前页的短链接列表
+		Total int64          `json:"total"` // 该用户的短链接总数
+	}
 	// 获取用户短链接列表的响应
 	ListShortUrlsResp {
 		Urls []ShortUrlInfo `json:"urls"` // 短链接列表
@@ -78,6 +88,10 @@ service Shortener {
 	@doc "获取当前用户的所有短链接"
 	@handler ListMyShortUrls
 	get /list returns (ListShortUrlsResp)
+
+	@doc "获取当前用户的所有短链接"
+	@handler ListPageMyShortUrls
+	get /list/page (ListPageMyShortUrlsReq) returns (ListPageMyShortUrlsResp)
 
 	@doc "获取单个短链接的详细信息和统计数据"
 	@handler GetShortUrlDetail

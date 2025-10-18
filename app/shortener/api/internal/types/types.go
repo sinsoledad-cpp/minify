@@ -37,6 +37,16 @@ type GetShortUrlDetailResp struct {
 	RecentRecords []AnalyticsRecord `json:"recentRecords"` // 最近访问记录 (示例，比如最近20条)
 }
 
+type ListPageMyShortUrlsReq struct {
+	Page     int `form:"page,default=1"`      // 页码，默认为1
+	PageSize int `form:"pageSize,default=20"` // 每页数量，默认为20
+}
+
+type ListPageMyShortUrlsResp struct {
+	Urls  []ShortUrlInfo `json:"urls"`  // 当前页的短链接列表
+	Total int64          `json:"total"` // 该用户的短链接总数
+}
+
 type ListShortUrlsResp struct {
 	Urls []ShortUrlInfo `json:"urls"` // 短链接列表
 }

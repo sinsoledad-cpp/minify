@@ -33,6 +33,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/list",
 				Handler: shortener.ListMyShortUrlsHandler(serverCtx),
 			},
+			{
+				// 获取当前用户的所有短链接
+				Method:  http.MethodGet,
+				Path:    "/list/page",
+				Handler: shortener.ListPageMyShortUrlsHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1/shortener"),
