@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/lucid.iml" filepath="$PROJECT_DIR$/.idea/lucid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/minify.iml" filepath="$PROJECT_DIR$/.idea/minify.iml" />
     </modules>
   </component>
 </project>
