@@ -18,6 +18,7 @@ type (
 		withSession(session sqlx.Session) UrlAnalyticsModel
 		GetTotalClicksAndUniqueVisitorsByShortUrlId(ctx context.Context, shortUrlId uint64) (totalClicks, uniqueVisitors int64, err error)
 		GetAnalyticsStatsByShortUrlIds(ctx context.Context, shortUrlIds []uint64) (map[uint64]AnalyticsStats, error)
+		FindRecentRecords(ctx context.Context, shortUrlId uint64, limit int) ([]*UrlAnalytics, error)
 	}
 
 	customUrlAnalyticsModel struct {
@@ -91,6 +92,19 @@ func (m *customUrlAnalyticsModel) GetAnalyticsStatsByShortUrlIds(ctx context.Con
 	}
 
 	return statsMap, nil
+}
+
+// FindRecentRecords 添加这个新方法
+func (m *customUrlAnalyticsModel) FindRecentRecords(ctx context.Context, shortUrlId uint64, limit int) ([]*UrlAnalytics, error) {
+	var resp []*UrlAnalytics
+	// 按创建时间降序排序，并限制数量
+	query := fmt.Sprintf("select %s from %s where `short_url_id` = ? order by `created_at` desc LIMIT ?", urlAnalyticsRows, m.table)
+
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, shortUrlId, limit)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (m *customUrlAnalyticsModel) withSession(session sqlx.Session) UrlAnalyticsModel {
