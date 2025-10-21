@@ -46,7 +46,7 @@ type (
 	group:  user
 	prefix: /api/v1/user
 )
-service user-api {
+service user {
 	@doc "用户注册"
 	@handler register
 	post /register (RegisterRequest) returns (LoginResponse)
@@ -61,7 +61,7 @@ service user-api {
 	prefix: /api/v1/user
 	jwt:    Auth
 )
-service user-api {
+service user {
 	@doc "获取当前登录用户信息"
 	@handler getUserInfo
 	get /info returns (UserInfoResponse)

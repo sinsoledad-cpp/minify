@@ -1,4 +1,4 @@
-Name: user-api
+Name: user
 Host: 0.0.0.0
 Port: 8888
 # ⭐ 新增 JWT Auth 配置
