@@ -8,7 +8,7 @@
 #goctl model mysql ddl -src="schema/sql/user/000001_create_short_urls_table.up.sql" -dir="data/model/user"
 #goctl model mysql ddl -src="schema/sql/user/000002_url_analytics_table.up.sql" -dir="data/model/user"
 #goctl model mysql ddl -src="schema/sql/user/000003_agg_daily_summary_table.up.sql" -dir="data/model/user"
-#goctl model mysql ddl -src="schema/sql/user/000001_create_url_analytics_table.up.sql" -dir="data/model/user"
+#goctl model mysql ddl -src="app/user/schema/sql/000001_users.up.sql" -dir="app/user/data/model"
 #
 #migrate  create -ext sql -dir . -seq users
 #migrate  create -ext sql -dir schema/sql/user -seq agg_daily_summary_table
