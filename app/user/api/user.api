@@ -3,8 +3,8 @@ syntax = "v1"
 info (
 	title:  "User Service API"
 	desc:   "用户微服务，负责用户认证（注册、登录）和信息管理"
-	author: "lucid"
-	email:  "lucid@example.com"
+	author: "minify"
+	email:  "minify@example.com"
 )
 
 // -------------------
