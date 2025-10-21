@@ -1,0 +1,77 @@
+syntax = "v1"
+
+info(
+    title: "User Service API"
+    desc: "用户微服务，负责用户认证（注册、登录）和信息管理"
+    author: "lucid"
+    email: "lucid@example.com"
+)
+
+// -------------------
+// Request & Response 类型定义
+// -------------------
+
+type (
+    // 用户注册请求
+    RegisterRequest {
+        Username string `json:"username"`
+        Password string `json:"password"`
+        Email    string `json:"email"` // <--- 修改：已移除 'optional' 标签，变为必填项
+    }
+
+        // 登录请求
+    LoginRequest {
+        Username string `json:"username"` // 可以是用户名或邮箱
+        Password string `json:"password"`
+    }
+
+        // 登录/注册成功响应，返回 JWT Token
+    LoginResponse {
+        AccessToken  string `json:"accessToken"`
+        AccessExpire int64  `json:"accessExpire"`
+    }
+)
+
+type (
+    UserInfoResponse {
+        Id        int64  `json:"id"`
+        Username  string `json:"username"`
+        Email     string `json:"email"` // 对应注册时的必填 email
+        Role      string `json:"role"` // 关键字段: 用于 Casbin 的 'sub'
+        CreatedAt string `json:"created_at"`
+    }
+)
+
+
+// -------------------
+// 服务路由定义
+// -------------------
+
+@server(
+    group: user
+    prefix: /api/v1/user
+)
+service user-api {
+    @doc "用户注册"
+    @handler register
+    post /register (RegisterRequest) returns (LoginResponse)
+
+    @doc "用户登录"
+    @handler login
+    post /login (LoginRequest) returns (LoginResponse)
+}
+
+@server(
+    group: user
+    prefix: /api/v1/user
+    jwt: Auth
+)
+service user-api {
+    @doc "获取当前登录用户信息"
+    @handler getUserInfo
+    get /info returns (UserInfoResponse)
+
+    @doc "用户登出"
+    @handler logout
+    post /logout returns ()
+}
