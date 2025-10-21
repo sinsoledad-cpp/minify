@@ -5,7 +5,6 @@ import (
 	"errors"
 	"lucid/app/user/data/model" // 引用 goctl model
 	"lucid/app/user/domain/entity"
-	// 引用 domain 接口
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

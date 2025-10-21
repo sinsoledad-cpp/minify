@@ -1,3 +1,11 @@
 Name: user-api
 Host: 0.0.0.0
 Port: 8888
+# ⭐ 新增 JWT Auth 配置
+Auth:
+  AccessSecret: "a_secret_key_change_it_later" # 替换为你自己的 Secret
+  AccessExpire: 86400 # 24 小时
+
+# ⭐ 新增数据库配置 (从你的 Makefile 获取)
+Database:
+  DataSource: "mysql://root:root@tcp(localhost:3306)/lucid?charset=utf8mb4&parseTime=true"
