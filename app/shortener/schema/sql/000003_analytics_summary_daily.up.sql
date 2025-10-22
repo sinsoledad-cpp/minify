@@ -2,13 +2,14 @@
 -- 职责: 存储预聚合后的报表数据 (读密集型)，供 API 快速查询。
 
 CREATE TABLE `analytics_summary_daily` (
-                                           `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                                           `id` BIGINT UNSIGNED AUTO_INCREMENT ,
                                            `link_id` BIGINT UNSIGNED NOT NULL COMMENT '关联的链接ID links(id)',
                                            `date` DATE NOT NULL COMMENT '聚合的日期 (e.g., 2025-10-21)',
                                            `dimension_type` VARCHAR(30) NOT NULL COMMENT '维度类型 (e.g., total, timeseries_hourly, referer, country, browser, os, device)',
                                            `dimension_value` VARCHAR(255) NOT NULL COMMENT '维度值 (e.g., 10 (for hourly), google.com, USA, Chrome)',
                                            `click_count` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '该维度在该天的总点击次数',
 
+                                           PRIMARY KEY (`id`),
     -- 唯一键确保后台任务可重复运行 (INSERT ... ON DUPLICATE KEY UPDATE)
                                            UNIQUE KEY `uniq_link_date_dim` (`link_id`, `date`, `dimension_type`, `dimension_value`(100)),
 

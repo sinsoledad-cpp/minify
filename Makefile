@@ -4,11 +4,10 @@
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/shortener/rpc --style=gozero  -c gen/go/shortener
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/shortener/rpc --style=gozero -c ./gen/go/shortener
 #
-#goctl model mysql ddl -src="schema/sql/shortener/001_create_users_table.sql" -dir="data/model/shortener"
-#goctl model mysql ddl -src="schema/sql/user/000001_create_short_urls_table.up.sql" -dir="data/model/user"
-#goctl model mysql ddl -src="schema/sql/user/000002_url_analytics_table.up.sql" -dir="data/model/user"
-#goctl model mysql ddl -src="schema/sql/user/000003_agg_daily_summary_table.up.sql" -dir="data/model/user"
+
 #goctl model mysql ddl -src="app/user/schema/sql/000001_users.up.sql" -dir="app/user/data/model"
+#goctl model mysql ddl -src="app/shortener/schema/sql/000001_links.up.sql" -dir="app/shortener/data/model"
+
 #
 #migrate  create -ext sql -dir . -seq analytics_summary_daily
 #migrate  create -ext sql -dir schema/sql/user -seq agg_daily_summary_table

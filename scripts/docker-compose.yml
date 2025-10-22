@@ -10,7 +10,7 @@ services:
   # todo sudo rm -rf mysql ; sudo mkdir -p mysql/data mysql/conf  && sudo chown -R 1001:1001 mysql &&  sudo docker pull registry.cn-guangzhou.aliyuncs.com/dbinggo-bitnami/mysql:8.0 && sudo docker tag registry.cn-guangzhou.aliyuncs.com/dbinggo-bitnami/mysql:8.0 bitnami/mysql:8.0
   mysql:
     image: bitnami/mysql:8.0  # sudo docker pull registry.cn-guangzhou.aliyuncs.com/dbinggo-bitnami/mysql:8.0 && sudo docker tag registry.cn-guangzhou.aliyuncs.com/dbinggo-bitnami/mysql:8.0 bitnami/mysql:8.0
-    container_name: mysql-lucid # 强制指定容器的名称为 mysql
+    container_name: mysql-minify # 强制指定容器的名称为 mysql
     hostname: mysql # 设置容器内部的主机名为 mysql
     restart: unless-stopped
 #    privileged: true # 特权模式
