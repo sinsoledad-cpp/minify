@@ -15,8 +15,8 @@ CREATE TABLE `analytics_summary_daily` (
 
     -- 关键索引: 优化 "Top N" 和 "TimeSeries" 查询
     -- (此索引可覆盖 GetAnalytics API 的所有查询)
-                                           INDEX `idx_query_analytics` (`link_id`, `date`, `dimension_type`, `click_count` DESC),
+                                           INDEX `idx_query_analytics` (`link_id`, `date`, `dimension_type`, `click_count` DESC)
 
     -- 外键 (确保数据一致性，随 links 表删除)
-                                           CONSTRAINT `fk_asd_link_id` FOREIGN KEY (`link_id`) REFERENCES `links` (`id`) ON DELETE CASCADE
+#                                            CONSTRAINT `fk_asd_link_id` FOREIGN KEY (`link_id`) REFERENCES `links` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='报表：按天聚合的多维度统计表 (读密集型)';

@@ -6,7 +6,9 @@
 #
 
 #goctl model mysql ddl -src="app/user/schema/sql/000001_users.up.sql" -dir="app/user/data/model"
-#goctl model mysql ddl -src="app/shortener/schema/sql/000001_links.up.sql" -dir="app/shortener/data/model"
+#goctl model mysql ddl -src="app/shortener/schema/sql/000001_links.up.sql" -dir="app/shortener/data/model" -c
+#goctl model mysql ddl -src="app/shortener/schema/sql/000002_link_access_logs.up.sql" -dir="app/shortener/data/model"
+#goctl model mysql ddl -src="app/shortener/schema/sql/000003_analytics_summary_daily.up.sql" -dir="app/shortener/data/model"
 
 #
 #migrate  create -ext sql -dir . -seq analytics_summary_daily
