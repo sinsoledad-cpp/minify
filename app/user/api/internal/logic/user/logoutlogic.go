@@ -6,7 +6,7 @@ package user
 import (
 	"context"
 
-	"lucid/app/user/api/internal/svc"
+	"minify/app/user/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

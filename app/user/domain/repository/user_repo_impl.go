@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
-	"lucid/app/user/data/model" // 引用 goctl model
-	"lucid/app/user/domain/entity"
+	"minify/app/user/data/model" // 引用 goctl model
+	"minify/app/user/domain/entity"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

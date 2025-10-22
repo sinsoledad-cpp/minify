@@ -2,14 +2,7 @@ package repository
 
 import (
 	"context"
-	"lucid/app/shortener/domain/entity" // 引用 Link 实体
-)
-
-const (
-	StatusActive   = "active"
-	StatusExpired  = "expired"
-	StatusInactive = "inactive"
-	StatusAll      = "all"
+	"minify/app/shortener/domain/entity" // 引用 Link 实体
 )
 
 // LinkRepository 是短链接仓储的接口

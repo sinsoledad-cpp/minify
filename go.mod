@@ -1,4 +1,4 @@
-module lucid
+module minify
 
 go 1.25.0
 

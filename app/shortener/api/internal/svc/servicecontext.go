@@ -4,7 +4,7 @@
 package svc
 
 import (
-	"lucid/app/shortener/api/internal/config"
+	"minify/app/shortener/api/internal/config"
 )
 
 type ServiceContext struct {

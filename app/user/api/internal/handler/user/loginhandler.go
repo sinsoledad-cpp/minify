@@ -6,9 +6,9 @@ package user
 import (
 	"net/http"
 
-	"lucid/app/user/api/internal/logic/user"
-	"lucid/app/user/api/internal/svc"
-	"lucid/app/user/api/internal/types"
+	"minify/app/user/api/internal/logic/user"
+	"minify/app/user/api/internal/svc"
+	"minify/app/user/api/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )

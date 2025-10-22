@@ -6,12 +6,12 @@ package user
 import (
 	"context"
 	"errors"
-	"lucid/app/user/domain/entity"
-	"lucid/common/utils/jwtx"
+	"minify/app/user/domain/entity"
+	"minify/common/utils/jwtx"
 	"time"
 
-	"lucid/app/user/api/internal/svc"
-	"lucid/app/user/api/internal/types"
+	"minify/app/user/api/internal/svc"
+	"minify/app/user/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

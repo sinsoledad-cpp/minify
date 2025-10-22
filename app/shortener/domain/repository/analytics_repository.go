@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
+	"minify/app/shortener/domain/entity"
+
 	// ⭐ 不再导入 api/internal/types
-	"lucid/app/shortener/domain/entity" // ⭐ 导入 domain entity
 	"time"
 )
 

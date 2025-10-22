@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"lucid/app/shortener/api/internal/logic/shortener"
-	"lucid/app/shortener/api/internal/svc"
-	"lucid/app/shortener/api/internal/types"
+	"minify/app/shortener/api/internal/logic/shortener"
+	"minify/app/shortener/api/internal/svc"
+	"minify/app/shortener/api/internal/types"
 )
 
 // 更新短链接

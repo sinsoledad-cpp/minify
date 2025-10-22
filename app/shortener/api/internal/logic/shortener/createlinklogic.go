@@ -6,8 +6,8 @@ package shortener
 import (
 	"context"
 
-	"lucid/app/shortener/api/internal/svc"
-	"lucid/app/shortener/api/internal/types"
+	"minify/app/shortener/api/internal/svc"
+	"minify/app/shortener/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

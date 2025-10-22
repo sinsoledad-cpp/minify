@@ -7,9 +7,9 @@ import (
 	"flag"
 	"fmt"
 
-	"lucid/app/shortener/api/internal/config"
-	"lucid/app/shortener/api/internal/handler"
-	"lucid/app/shortener/api/internal/svc"
+	"minify/app/shortener/api/internal/config"
+	"minify/app/shortener/api/internal/handler"
+	"minify/app/shortener/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"

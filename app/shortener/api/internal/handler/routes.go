@@ -6,8 +6,8 @@ package handler
 import (
 	"net/http"
 
-	shortener "lucid/app/shortener/api/internal/handler/shortener"
-	"lucid/app/shortener/api/internal/svc"
+	shortener "minify/app/shortener/api/internal/handler/shortener"
+	"minify/app/shortener/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

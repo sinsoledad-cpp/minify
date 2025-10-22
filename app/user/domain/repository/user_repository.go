@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"lucid/app/user/domain/entity"
+	"minify/app/user/domain/entity"
 )
 
 // UserRepository 是用户仓储的接口

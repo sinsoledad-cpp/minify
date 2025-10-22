@@ -4,10 +4,10 @@
 package svc
 
 import (
-	"lucid/app/user/api/internal/config"
-	"lucid/app/user/data/model"
-	"lucid/app/user/domain/repository"
-	datarepo "lucid/app/user/domain/repository"
+	"minify/app/user/api/internal/config"
+	"minify/app/user/data/model"
+	"minify/app/user/domain/repository"
+	datarepo "minify/app/user/domain/repository"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )

@@ -6,8 +6,8 @@ package handler
 import (
 	"net/http"
 
-	user "lucid/app/user/api/internal/handler/user"
-	"lucid/app/user/api/internal/svc"
+	user "minify/app/user/api/internal/handler/user"
+	"minify/app/user/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

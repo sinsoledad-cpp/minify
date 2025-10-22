@@ -3,14 +3,20 @@ package entity
 import (
 	"database/sql"
 	"errors"
-	"lucid/app/shortener/data/model" // 引用 goctl 生成的 PO
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+const (
+	StatusActive   = "active"
+	StatusExpired  = "expired"
+	StatusInactive = "inactive"
+	StatusAll      = "all"
+)
+
 var (
-	ErrLinkNotFound            = model.ErrNotFound // 复用 model 的错误
+	ErrLinkNotFound            = errors.New("link not found") // ⭐ 直接定义
 	ErrInvalidOriginalURL      = errors.New("invalid original URL")
 	ErrInvalidExpiresIn        = errors.New("invalid expires in duration format")
 	ErrLinkExpired             = errors.New("link has expired")
@@ -135,43 +141,5 @@ func (l *Link) MarkDeleted() {
 	if !l.DeletedAt.Valid {
 		l.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
 		l.UpdatedAt = l.DeletedAt.Time // 同时更新 updated_at
-	}
-}
-
-// --- DTO / PO 转换 ---
-
-// ToModel 将领域实体(Entity)转换为数据模型(PO)
-func (l *Link) ToModel() *model.Links {
-	isActiveInt := int64(0)
-	if l.IsActive {
-		isActiveInt = 1
-	}
-	return &model.Links{
-		Id:             uint64(l.ID),
-		UserId:         l.UserID,
-		ShortCode:      l.ShortCode,
-		OriginalUrl:    l.OriginalUrl,
-		VisitCount:     l.VisitCount,
-		IsActive:       isActiveInt,
-		ExpirationTime: l.ExpirationTime,
-		CreatedAt:      l.CreatedAt,
-		UpdatedAt:      l.UpdatedAt,
-		DeletedAt:      l.DeletedAt,
-	}
-}
-
-// FromModel 将数据模型(PO)转换为领域实体(Entity)
-func FromModel(m *model.Links) *Link {
-	return &Link{
-		ID:             int64(m.Id),
-		UserID:         m.UserId,
-		ShortCode:      m.ShortCode,
-		OriginalUrl:    m.OriginalUrl,
-		VisitCount:     m.VisitCount,
-		IsActive:       m.IsActive == 1,
-		ExpirationTime: m.ExpirationTime,
-		CreatedAt:      m.CreatedAt,
-		UpdatedAt:      m.UpdatedAt,
-		DeletedAt:      m.DeletedAt,
 	}
 }

@@ -2,7 +2,7 @@ package entity
 
 import (
 	"errors"
-	"lucid/app/user/data/model" // 引用 goctl 生成的 model
+	"minify/app/user/data/model" // 引用 goctl 生成的 model
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
