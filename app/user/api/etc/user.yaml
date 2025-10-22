@@ -8,4 +8,4 @@ Auth:
 
 # ⭐ 新增数据库配置 (从你的 Makefile 获取)
 Database:
-  DataSource: "mysql://root:root@tcp(localhost:3306)/lucid?charset=utf8mb4&parseTime=True&loc=Local"
+  DataSource: "mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=True&loc=Local"
