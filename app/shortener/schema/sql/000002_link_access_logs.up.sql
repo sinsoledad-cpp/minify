@@ -1,3 +1,6 @@
+-- 文件: app/shortener/schema/sql/000002_link_access_logs.up.sql
+-- 职责: 存储每一次访问的原始日志 (写密集型)。
+
 CREATE TABLE `link_access_logs` (
                                     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                                     `link_id` BIGINT UNSIGNED NOT NULL COMMENT '关联的链接ID links(id)',
@@ -12,13 +15,9 @@ CREATE TABLE `link_access_logs` (
                                     `browser_name` VARCHAR(50) NULL COMMENT 'UA解析-浏览器 (ETL处理后填入)',
                                     `os_name` VARCHAR(50) NULL COMMENT 'UA解析-操作系统 (ETL处理后填入)',
 
-    -- 核心索引：用于查询【某个链接】的【时间段】报表
+    -- 核心索引：仅供后台 Cron 任务聚合数据时使用
                                     INDEX `idx_link_id_accessed_at` (`link_id`, `accessed_at`),
 
-    -- 核心索引：用于查询【全局】的【时间段】报表
+    -- 核心索引：供后台 Cron 任务按时间范围拉取日志
                                     INDEX `idx_accessed_at` (`accessed_at`)
-
-    -- 注意：此表不建议添加外键到 links(id)，
-    -- 因为 links 表的记录可能被硬删除（尽管我们用了软删除），或日志写入性能要求极高，
-    -- 保持日志表的独立性更好。
-) COMMENT='短链接访问日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='短链接访问日志表 (写密集型)';

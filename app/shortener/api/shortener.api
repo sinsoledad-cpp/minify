@@ -1,0 +1,169 @@
+syntax = "v1"
+
+info(
+    title:  "Shortener Service API"
+    desc:   "短链接微服务，负责短链接生成、重定向和报表分析"
+    author: "lucid"
+    email:  "lucid@example.com"
+)
+
+// -------------------
+// 类型定义 (DTO)
+// -------------------
+
+// 单个链接的基础信息 (用于列表或响应)
+// 它的字段来源于 links 表
+type Link {
+    Id             int64  `json:"id"`
+    ShortCode      string `json:"shortCode"`
+    OriginalUrl    string `json:"originalUrl"`
+    VisitCount     int64  `json:"visitCount"`      // 来自 links.visit_count，由后台异步更新
+    IsActive       bool   `json:"isActive"`
+    ExpirationTime string `json:"expirationTime,optional"` // ISO 8601 格式, e.g., "2025-10-21T08:00:00Z"
+    CreatedAt      string `json:"createdAt"`
+}
+
+// --- 创建 ---
+type CreateLinkRequest {
+    OriginalUrl string `json:"originalUrl"`         // 必填：原始长链接
+    CustomCode  string `json:"customCode,optional"` // 选填：自定义短码
+                                                    // 使用相对时长 (e.g., "1h", "7d", "30m"). 空字符串或 "null" 表示永不过期
+    ExpiresIn   string `json:"expiresIn,optional"`
+}
+type CreateLinkResponse {
+    Link Link `json:"link"`
+}
+
+// --- 列表 (分页) ---
+type ListLinksRequest {
+    Page     int    `json:"page,optional"`     // 页码, 默认 1
+    PageSize int    `json:"pageSize,optional"` // 每页数量, 默认 20
+                                               // 状态过滤器 (基于我们对索引的优化)
+                                               // "active" (默认): 仅显示有效的、未过期的
+                                               // "expired": 仅显示已过期的
+                                               // "inactive": 仅显示手动禁用的 (is_active = 0)
+                                               // "all":     显示所有 (不包括软删除的)
+    Status   string `json:"status,optional"`
+}
+type ListLinksResponse {
+    Links []Link `json:"links"`
+    // 含义：符合该 status 过滤条件的 links 表总记录数 (用于分页)
+    Total int64  `json:"total"`
+}
+
+// --- 更新 ---
+type UpdateLinkRequest {
+    Code        string `path:"code"`                   // 路径参数：要更新的 short_code
+    OriginalUrl string `json:"originalUrl,optional"` // 选填：新的目标地址
+    IsActive    *bool  `json:"isActive,optional"`    // 选填：是否激活 (使用指针以区分 false 和 "未提供")
+                                                       // 更新时使用绝对时间 (ISO 8601)，"null" 或 "" 表示清除过期时间
+    ExpirationTime *string `json:"expirationTime,optional"`
+}
+type UpdateLinkResponse {
+    Link Link `json:"link"`
+}
+
+// --- 删除 ---
+type DeleteLinkRequest {
+    Code string `path:"code"` // 路径参数：要删除的 short_code
+}
+// (删除成功返回 HTTP 200 OK 或 204 No Content, 无需 body)
+
+// --- 重定向 ---
+type RedirectRequest {
+    Code string `path:"code"`
+}
+
+// -------------------
+// 报表类型 (Analytics DTO)
+// -------------------
+
+// 报表中的统计项 (e.g., "Chrome", 1024)
+type StatItem {
+    Key   string `json:"key"`
+    Value int64  `json:"value"`
+}
+
+// 时间序列数据点 (e.g., "2025-10-21", 150)
+type ClickPoint {
+    Time  string `json:"time"` // 日期或小时
+    Value int64  `json:"value"`
+}
+
+// --- 单链接报表 ---
+type GetAnalyticsRequest {
+    Code      string `path:"code"`
+    StartDate string `json:"startDate,optional"` // ISO 8601 日期
+    EndDate   string `json:"endDate,optional"`   // ISO 8601 日期
+}
+type GetAnalyticsResponse {
+    ShortCode     string       `json:"shortCode"`
+    TotalClicks   int64        `json:"totalClicks"`   // 数据源：聚合表
+    TimeSeries    []ClickPoint `json:"timeSeries"`    // 数据源：聚合表
+    TopReferers   []StatItem   `json:"topReferers"`   // 数据源：聚合表
+    TopCountries  []StatItem   `json:"topCountries"`  // 数据源：聚合表
+    TopDevices    []StatItem   `json:"topDevices"`    // 数据源：聚合表
+    TopBrowsers   []StatItem   `json:"topBrowsers"`   // 数据源：聚合表
+    TopOS         []StatItem   `json:"topOS"`         // 数据源：聚合表
+}
+
+// --- 仪表盘总览 ---
+type GetDashboardRequest {
+    StartDate string `json:"startDate,optional"`
+    EndDate   string `json:"endDate,optional"`
+}
+type GetDashboardResponse {
+    TotalLinks      int64 `json:"totalLinks"`      // 数据源: links 表
+    TotalClicks     int64 `json:"totalClicks"`     // 数据源: 聚合表
+    TopLink         *Link `json:"topLink,optional"` // 点击量最高的链接 (使用指针)
+}
+
+// -------------------
+// 服务路由定义
+// -------------------
+
+// 1. 公共服务 (重定向) - 无需认证
+@server(
+    group: shortener // 对应 /internal/handler/shortener
+)
+service shortener { // 使用简洁的服务名
+    @doc "短链接重定向 (301/302)"
+    @handler redirect
+    get /:code (RedirectRequest)
+}
+
+// 2. 认证服务 (链接管理 & 报表) - 需要 JWT
+@server(
+    group:  shortener // 对应 /internal/handler/shortener
+    prefix: /api/v1 // 使用 API 版本前缀
+    jwt:    Auth    // 引用 user-api.yaml 中的 Auth 配置
+)
+service shortener { // 使用简洁的服务名
+    // --- 链接管理 (CRUD) ---
+
+    @doc "创建短链接"
+    @handler createLink
+    post /links (CreateLinkRequest) returns (CreateLinkResponse)
+
+    @doc "获取短链接列表 (分页)"
+    @handler listLinks
+    get /links (ListLinksRequest) returns (ListLinksResponse)
+
+    @doc "更新短链接"
+    @handler updateLink
+    put /links/:code (UpdateLinkRequest) returns (UpdateLinkResponse)
+
+    @doc "删除短链接 (软删除)"
+    @handler deleteLink
+    delete /links/:code (DeleteLinkRequest) // 无 returns
+
+    // --- 报表分析 (Analytics) ---
+
+    @doc "获取仪表盘总览数据"
+    @handler getDashboard
+    get /analytics/dashboard (GetDashboardRequest) returns (GetDashboardResponse)
+
+    @doc "获取单个链接的详细报表"
+    @handler getAnalytics
+    get /analytics/:code (GetAnalyticsRequest) returns (GetAnalyticsResponse)
+}

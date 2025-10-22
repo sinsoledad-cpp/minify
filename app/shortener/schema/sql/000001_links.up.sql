@@ -1,3 +1,6 @@
+-- 文件: app/shortener/schema/sql/000001_links.up.sql (最终优化版)
+-- 职责: 存储短码和长链接的映射，支持软删除和高效的列表过滤。
+
 CREATE TABLE `links` (
                          `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                          `user_id` BIGINT UNSIGNED NOT NULL COMMENT '创建者ID，关联 users(id)',
@@ -13,12 +16,16 @@ CREATE TABLE `links` (
     -- 核心索引：确保 short_code 唯一
                          UNIQUE INDEX `uniq_short_code` (`short_code`),
 
-    -- 优化索引：用于高性能重定向查询 (WHERE short_code = ? AND deleted_at IS NULL AND is_active = 1)
+    -- 优化索引：用于高性能重定向 (GET /:code)
                          INDEX `idx_redirect` (`short_code`, `deleted_at`, `is_active`),
 
-    -- 优化索引：用于用户查询自己的链接列表 (WHERE user_id = ? AND deleted_at IS NULL)
-                         INDEX `idx_user_list` (`user_id`, `deleted_at`),
+    -- 优化索引：用于按 "status" (active/inactive) 过滤列表 (GET /links?status=active)
+    -- 这个索引覆盖了 WHERE, ORDER BY, 和 LIMIT，性能最高
+                         INDEX `idx_user_status_sort` (`user_id`, `deleted_at`, `is_active`, `created_at` DESC),
+
+    -- 优化索引：用于按 "status" (expired) 过滤列表 (GET /links?status=expired)
+                         INDEX `idx_user_expiration_sort` (`user_id`, `deleted_at`, `expiration_time`, `created_at` DESC),
 
     -- 外键约束
                          CONSTRAINT `fk_links_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) COMMENT='短链接表 (支持软删除)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='短链接表 (支持软删除和高效过滤)';

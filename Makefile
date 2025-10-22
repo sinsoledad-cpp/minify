@@ -10,7 +10,7 @@
 #goctl model mysql ddl -src="schema/sql/user/000003_agg_daily_summary_table.up.sql" -dir="data/model/user"
 #goctl model mysql ddl -src="app/user/schema/sql/000001_users.up.sql" -dir="app/user/data/model"
 #
-#migrate  create -ext sql -dir . -seq users
+#migrate  create -ext sql -dir . -seq analytics_summary_daily
 #migrate  create -ext sql -dir schema/sql/user -seq agg_daily_summary_table
 #migrate  create -ext sql -dir schema/sql/user -seq url_analytics_table
 #migrate  create -ext sql -dir schema/sql/shortener -seq create_users_table
