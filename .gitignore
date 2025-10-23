@@ -6,3 +6,5 @@
 *.iml
 out
 common/gen
+
+/template/

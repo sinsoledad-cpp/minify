@@ -120,6 +120,10 @@ func (l *Link) UpdateDetails(originalURL *string, isActive *bool, expirationTime
 		if *expirationTime == "" || *expirationTime == "null" {
 			l.ExpirationTime = sql.NullTime{Valid: false}
 		} else {
+			/*
+				loc, err := time.LoadLocation("Asia/Shanghai")
+				t, err := time.ParseInLocation(time.RFC3339, *expirationTime, loc)
+			*/
 			// 更新时只接受 ISO 8601 格式
 			t, err := time.Parse(time.RFC3339, *expirationTime)
 			if err != nil {
