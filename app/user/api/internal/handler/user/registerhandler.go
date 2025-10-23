@@ -4,6 +4,7 @@
 package user
 
 import (
+	"minify/common/utils/response"
 	"net/http"
 
 	"minify/app/user/api/internal/logic/user"
@@ -18,16 +19,19 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.RegisterRequest
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.ClientError(r.Context(), w, response.RequestError, err.Error())
+			//httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
 		l := user.NewRegisterLogic(r.Context(), svcCtx)
 		resp, err := l.Register(&req)
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.LogicError(r.Context(), w, err)
+			//httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			response.Ok(r.Context(), w, resp)
+			//httpx.OkJsonCtx(r.Context(), w, resp)
 		}
 	}
 }
