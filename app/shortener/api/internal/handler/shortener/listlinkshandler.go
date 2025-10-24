@@ -10,6 +10,8 @@ import (
 	"minify/app/shortener/api/internal/logic/shortener"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
+
+	"minify/common/utils/response"
 )
 
 // 获取短链接列表 (分页)
@@ -17,16 +19,16 @@ func ListLinksHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ListLinksRequest
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.ClientError(r.Context(), w, response.RequestError, err.Error())
 			return
 		}
 
 		l := shortener.NewListLinksLogic(r.Context(), svcCtx)
 		resp, err := l.ListLinks(&req)
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.LogicError(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			response.Ok(r.Context(), w, resp)
 		}
 	}
 }

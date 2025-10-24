@@ -13,6 +13,8 @@ import (
 	"minify/app/shortener/api/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
+
+	"minify/common/utils/response"
 )
 
 // 短链接重定向 (301/302)
@@ -20,7 +22,7 @@ func RedirectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.RedirectRequest
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.ClientError(r.Context(), w, response.RequestError, err.Error())
 			return
 		}
 

@@ -9,7 +9,6 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// ... (Body, BizError, NewBizError, OK, OKMsg, InternalError, RequestError 保持不变) ...
 type Body struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
@@ -36,9 +35,6 @@ const (
 	RequestError  = 400
 )
 
-// --------------------------------------------------------------------
-// 成功响应 (Ok, OkMsg, Success 保持不变)
-// --------------------------------------------------------------------
 func Ok(ctx context.Context, w http.ResponseWriter, resp interface{}) {
 	Success(ctx, w, http.StatusOK, resp, OKMsg)
 }
@@ -59,13 +55,6 @@ func Success(ctx context.Context, w http.ResponseWriter, httpStatus int, resp in
 	httpx.WriteJsonCtx(ctx, w, httpStatus, body)
 }
 
-// --------------------------------------------------------------------
-// 错误响应 (已重构)
-// --------------------------------------------------------------------
-
-// Error 是一个通用的、可自定义的错误响应（底层函数）
-// 它允许你自定义 HTTP 状态码、业务码 和 消息
-// (这是我们新增的底层函数)
 func Error(ctx context.Context, w http.ResponseWriter, httpStatus int, bizCode int, errMsg string) {
 	body := Body{
 		Code: bizCode,

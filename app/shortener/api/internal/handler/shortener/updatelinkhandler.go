@@ -10,6 +10,8 @@ import (
 	"minify/app/shortener/api/internal/logic/shortener"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
+
+	"minify/common/utils/response"
 )
 
 // 更新短链接
@@ -17,16 +19,16 @@ func UpdateLinkHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.UpdateLinkRequest
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.ClientError(r.Context(), w, response.RequestError, err.Error())
 			return
 		}
 
 		l := shortener.NewUpdateLinkLogic(r.Context(), svcCtx)
 		resp, err := l.UpdateLink(&req)
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.LogicError(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			response.Ok(r.Context(), w, resp)
 		}
 	}
 }
