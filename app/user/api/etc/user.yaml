@@ -9,3 +9,7 @@ Auth:
 # ⭐ 新增数据库配置 (从你的 Makefile 获取)
 Database:
   DataSource: "root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
+
+Casbin:
+  ModelPath: "etc/rbac_model.conf"  # 指向项目根目录的 etc
+  PolicyPath: "etc/policy.csv"    # 指向项目根目录的 etc
