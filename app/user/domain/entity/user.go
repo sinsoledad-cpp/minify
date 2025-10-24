@@ -39,7 +39,7 @@ func NewUser(username, email, plainPassword string) (*User, error) {
 		Username:     username,
 		Email:        email,
 		PasswordHash: string(hash),
-		Role:         "shortener", // 匹配你的 SQL 默认值
+		Role:         "user", // 匹配你的 SQL 默认值
 	}, nil
 }
 

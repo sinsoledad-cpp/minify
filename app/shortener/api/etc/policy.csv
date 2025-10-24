@@ -1,0 +1,21 @@
+# 策略 (p, 角色, 路径, 方法)
+
+# --- "user" 角色的权限 ---
+# 链接管理 (CRUD)
+p, user, /api/v1/links, POST
+p, user, /api/v1/links, GET
+p, user, /api/v1/links/:code, PUT
+p, user, /api/v1/links/:code, DELETE
+
+# 报表分析
+p, user, /api/v1/analytics/dashboard, GET
+p, user, /api/v1/analytics/:code, GET
+
+# --- "admin" 角色的权限 ---
+# (假设 admin 拥有 user 的所有权限)
+p, admin, /api/v1/links, POST
+p, admin, /api/v1/links, GET
+p, admin, /api/v1/links/:code, PUT
+p, admin, /api/v1/links/:code, DELETE
+p, admin, /api/v1/analytics/dashboard, GET
+p, admin, /api/v1/analytics/:code, GET
