@@ -48,32 +48,3 @@ func (u *User) CheckPassword(plainPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(plainPassword))
 	return err == nil
 }
-
-// --- DTO 转换 ---
-// (DDD 中，实体与持久化对象(PO)的转换是必要的)
-
-// ToModel 将领域实体(Entity)转换为数据模型(PO)
-func (u *User) ToModel() *model.Users {
-	return &model.Users{
-		Id:           uint64(u.ID), // 注意类型转换
-		Username:     u.Username,
-		Email:        u.Email,
-		PasswordHash: u.PasswordHash,
-		Role:         u.Role,
-		CreatedAt:    u.CreatedAt,
-		UpdatedAt:    u.UpdatedAt,
-	}
-}
-
-// FromModel 将数据模型(PO)转换为领域实体(Entity)
-func FromModel(m *model.Users) *User {
-	return &User{
-		ID:           int64(m.Id), // 注意类型转换
-		Username:     m.Username,
-		Email:        m.Email,
-		PasswordHash: m.PasswordHash,
-		Role:         m.Role,
-		CreatedAt:    m.CreatedAt,
-		UpdatedAt:    m.UpdatedAt,
-	}
-}

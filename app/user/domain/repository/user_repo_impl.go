@@ -22,10 +22,43 @@ func NewUserRepoImpl(userModel model.UsersModel) UserRepository {
 	}
 }
 
+// --- 辅助转换函数 ---
+
+// toModel 将领域实体(Entity)转换为数据模型(PO)
+// (这是仓储实现层的私有方法)
+func toModel(u *entity.User) *model.Users {
+	return &model.Users{
+		Id:           uint64(u.ID), // 注意类型转换
+		Username:     u.Username,
+		Email:        u.Email,
+		PasswordHash: u.PasswordHash,
+		Role:         u.Role,
+		CreatedAt:    u.CreatedAt,
+		UpdatedAt:    u.UpdatedAt,
+	}
+}
+
+// fromModel 将数据模型(PO)转换为领域实体(Entity)
+// (这是仓储实现层的私有方法)
+func fromModel(m *model.Users) *entity.User {
+	if m == nil {
+		return nil
+	}
+	return &entity.User{
+		ID:           int64(m.Id), // 注意类型转换
+		Username:     m.Username,
+		Email:        m.Email,
+		PasswordHash: m.PasswordHash,
+		Role:         m.Role,
+		CreatedAt:    m.CreatedAt,
+		UpdatedAt:    m.UpdatedAt,
+	}
+}
+
 // Create 实现了接口，内部调用 goctl model
 func (r *userRepoImpl) Create(ctx context.Context, user *entity.User) error {
 	// 调用实体的 ToModel 方法转为 PO
-	po := user.ToModel()
+	po := toModel(user)
 
 	// goctl model 的 Insert 不返回 ID, 并且 CreatedAt/UpdatedAt 由数据库生成
 	// 我们需要调整一下 PO，让 goctl model 能够正确插入
@@ -62,7 +95,7 @@ func (r *userRepoImpl) FindByUsername(ctx context.Context, username string) (*en
 	}
 
 	// 将 PO 转换为 Entity 返回
-	return entity.FromModel(po), nil
+	return fromModel(po), nil
 }
 
 func (r *userRepoImpl) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
@@ -74,7 +107,7 @@ func (r *userRepoImpl) FindByEmail(ctx context.Context, email string) (*entity.U
 		logx.WithContext(ctx).Errorf("userRepoImpl.FindByEmail error: %v", err)
 		return nil, err
 	}
-	return entity.FromModel(po), nil
+	return fromModel(po), nil
 }
 
 func (r *userRepoImpl) FindByID(ctx context.Context, id int64) (*entity.User, error) {
@@ -86,5 +119,5 @@ func (r *userRepoImpl) FindByID(ctx context.Context, id int64) (*entity.User, er
 		logx.WithContext(ctx).Errorf("userRepoImpl.FindByID error: %v", err)
 		return nil, err
 	}
-	return entity.FromModel(po), nil
+	return fromModel(po), nil
 }
