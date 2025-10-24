@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"minify/app/shortener/api/internal/logic"
+	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
 	"minify/app/shortener/domain/entity"
@@ -35,7 +36,7 @@ func (l *CreateLinkLogic) CreateLink(req *types.CreateLinkRequest) (resp *types.
 	// 1. 从 JWT Context 获取用户 ID
 	claims, err := jwtx.GetClaimsFromCtx(l.ctx) //
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, errcode.ErrInvalidToken
 	}
 	userId := uint64(claims.UserID)
 
@@ -47,11 +48,11 @@ func (l *CreateLinkLogic) CreateLink(req *types.CreateLinkRequest) (resp *types.
 		shortCode = req.CustomCode
 		_, err := l.svcCtx.LinkRepo.FindByCode(l.ctx, shortCode)
 		if err == nil {
-			return nil, errors.New("custom code already exists")
+			return nil, errcode.ErrCustomCodeExists
 		}
 		if !errors.Is(err, entity.ErrLinkNotFound) {
 			l.Logger.Errorf("FindByCode for custom code error: %v", err)
-			return nil, errors.New("internal server error")
+			return nil, errcode.ErrInternalError
 		}
 	} else {
 		// --- 策略一：自动生成 (Snowflake) ---
@@ -60,7 +61,7 @@ func (l *CreateLinkLogic) CreateLink(req *types.CreateLinkRequest) (resp *types.
 		if err != nil {
 			l.Logger.Errorf("IdGenerator.NextID (Snowflake) error: %v", err)
 			// ⭐ 修正：使用 httpx.NewCodeError
-			return nil, errors.New("failed to generate id")
+			return nil, errcode.ErrIdGenerateError
 		}
 
 		// b. 使用 Base62 编码 (工具来自 common/utils/codec)
@@ -72,14 +73,14 @@ func (l *CreateLinkLogic) CreateLink(req *types.CreateLinkRequest) (resp *types.
 	if err != nil {
 		l.Logger.Infof("NewLink validation error: %v", err)
 		// ⭐ 修正：使用 httpx.NewCodeError
-		return nil, errors.New("invalid request parameters")
+		return nil, errcode.ErrInternalError
 	}
 
 	// 4. 保存到仓储 (Repository)
 	if err := l.svcCtx.LinkRepo.Create(l.ctx, link); err != nil { //
 		l.Logger.Errorf("LinkRepo.Create error: %v", err)
 		// ⭐ 修正：使用 httpx.NewCodeError
-		return nil, errors.New("failed to create link")
+		return nil, errcode.ErrInternalError
 	}
 
 	// 5. 转换 DTO 并返回

@@ -17,3 +17,7 @@ CacheRedis: # ⭐ Redis 配置 (用于 links 缓存)
 
 Snowflake:
   WorkerId: 1
+
+Casbin:
+  ModelPath: "etc/rbac_model.conf"  # 指向项目根目录的 etc
+  PolicyPath: "etc/policy.csv"    # 指向项目根目录的 etc

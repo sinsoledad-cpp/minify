@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"minify/app/shortener/api/internal/logic"
+	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/domain/entity"
 	"minify/common/utils/jwtx"
 
@@ -35,7 +36,7 @@ func (l *GetAnalyticsLogic) GetAnalytics(req *types.GetAnalyticsRequest) (resp *
 	// 1. 从 JWT Context 获取用户 ID (身份认证)
 	claims, err := jwtx.GetClaimsFromCtx(l.ctx)
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, errcode.ErrInvalidToken
 	}
 	userId := uint64(claims.UserID)
 
@@ -61,14 +62,14 @@ func (l *GetAnalyticsLogic) GetAnalytics(req *types.GetAnalyticsRequest) (resp *
 	startDate, endDate, err := logic.ParseAnalyticsDates(req.StartDate, req.EndDate)
 	if err != nil {
 		l.Logger.Infof("parseAnalyticsDates error: %v", err)
-		return nil, errors.New("invalid date format")
+		return nil, errcode.ErrInternalError
 	}
 
 	// 5. 调用仓储(Repository)获取报表数据
 	analyticsEntity, err := l.svcCtx.AnalyticsRepo.GetLinkAnalytics(l.ctx, link.ID, startDate, endDate)
 	if err != nil {
 		l.Logger.Errorf("AnalyticsRepo.GetLinkAnalytics error: %v", err)
-		return nil, errors.New("failed to get analytics")
+		return nil, errcode.ErrInternalError
 	}
 
 	// 6. 将领域实体(Entity)转换为 DTO (⭐ 调用 logic 包中的辅助函数)

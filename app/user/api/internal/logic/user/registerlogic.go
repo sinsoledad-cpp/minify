@@ -40,7 +40,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.LoginR
 	}
 	if !errors.Is(err, entity.ErrUserNotFound) {
 		l.Logger.Errorf("FindByUsername error: %v", err)
-		return nil, err // 500 错误
+		return nil, errcode.ErrInternalError // 500 错误
 	}
 
 	// 2. 检查邮箱
@@ -50,7 +50,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.LoginR
 	}
 	if !errors.Is(err, entity.ErrUserNotFound) {
 		l.Logger.Errorf("FindByEmail error: %v", err)
-		return nil, err // 500 错误
+		return nil, errcode.ErrInternalError // 500 错误
 	}
 
 	// 3. 创建 User 实体
@@ -64,7 +64,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.LoginR
 	// 4. 持久化
 	if err := l.svcCtx.UserRepo.Create(l.ctx, user); err != nil {
 		l.Logger.Errorf("UserRepo.Create error: %v", err)
-		return nil, err // 500 错误
+		return nil, errcode.ErrInternalError // 500 错误
 	}
 
 	// 5. 生成 JWT
@@ -79,7 +79,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.LoginR
 	)
 	if err != nil {
 		l.Logger.Errorf("GenerateToken error: %v", err)
-		return nil, err // 500 错误
+		return nil, errcode.ErrInternalError // 500 错误
 	}
 
 	return &types.LoginResponse{

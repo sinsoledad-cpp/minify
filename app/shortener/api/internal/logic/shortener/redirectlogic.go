@@ -6,6 +6,7 @@ package shortener
 import (
 	"context"
 	"errors"
+	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/domain/entity"
 
 	"minify/app/shortener/api/internal/svc"
@@ -38,13 +39,13 @@ func (l *RedirectLogic) Redirect(req *types.RedirectRequest) (string, error) {
 			return "", entity.ErrLinkNotFound // entity.ErrLinkNotFound 是一个标准 error
 		}
 		l.Logger.Errorf("FindByCode error: %v", err)
-		return "", err
+		return "", errcode.ErrInternalError
 	}
 
 	// 2. 检查链接是否可用
 	if err := link.CanRedirect(); err != nil {
 		// 例如返回 ErrLinkExpired
-		return "", err
+		return "", errcode.ErrLinkExpired
 	}
 
 	// 3. (TODO) 在这里异步发送日志...

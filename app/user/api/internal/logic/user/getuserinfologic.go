@@ -5,7 +5,7 @@ package user
 
 import (
 	"context"
-	"errors"
+	"minify/app/user/api/internal/logic/errcode"
 	"minify/common/utils/jwtx"
 	"time"
 
@@ -33,14 +33,14 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 func (l *GetUserInfoLogic) GetUserInfo() (resp *types.UserInfoResponse, err error) {
 	claims, err := jwtx.GetClaimsFromCtx(l.ctx)
 	if err != nil {
-		return nil, err
+		return nil, errcode.ErrTokenInvalid
 	}
 
 	// 3. ⭐ 调用仓储接口
 	user, err := l.svcCtx.UserRepo.FindByID(l.ctx, claims.UserID)
 	if err != nil {
 		l.Logger.Errorf("FindByID error: %v", err)
-		return nil, errors.New("user not found")
+		return nil, errcode.ErrUserNotFound
 	}
 
 	// 4. ⭐ 转换为 API 响应 (DTO)

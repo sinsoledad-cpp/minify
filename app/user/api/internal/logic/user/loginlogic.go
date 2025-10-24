@@ -6,6 +6,7 @@ package user
 import (
 	"context"
 	"errors"
+	"minify/app/user/api/internal/logic/errcode"
 	"minify/app/user/domain/entity"
 	"minify/common/utils/jwtx"
 	"time"
@@ -41,18 +42,18 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 			user, err = l.svcCtx.UserRepo.FindByEmail(l.ctx, req.Username)
 			if err != nil {
 				// 无论是没找到还是数据库错误，都返回密码错误，防止信息泄露
-				return nil, entity.ErrPasswordMismatch //
+				return nil, errcode.ErrUserPassword //
 			}
 		} else {
 			// 其他数据库错误
 			l.Logger.Errorf("FindByUsername error: %v", err)
-			return nil, err
+			return nil, errcode.ErrInternalError
 		}
 	}
 
 	// 2. ⭐ 调用领域实体(Entity)的业务方法校验密码
 	if !user.CheckPassword(req.Password) {
-		return nil, entity.ErrPasswordMismatch //
+		return nil, errcode.ErrUserPassword //
 	}
 
 	// 3. 密码正确，生成 JWT
@@ -67,7 +68,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		user.Role,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errcode.ErrInternalError
 	}
 
 	// 4. 返回响应

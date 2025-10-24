@@ -21,4 +21,6 @@ var (
 
 	// ErrTokenInvalid Token 无效或已过期
 	ErrTokenInvalid = response.NewBizError(10005, "invalid token")
+
+	ErrInternalError = response.NewBizError(11500, "服务器内部错误")
 )

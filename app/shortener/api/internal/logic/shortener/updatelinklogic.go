@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"minify/app/shortener/api/internal/logic"
+	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/domain/entity"
 	"minify/common/utils/jwtx"
 
@@ -35,7 +36,7 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 	// 1. 从 JWT Context 获取用户 ID (身份认证)
 	claims, err := jwtx.GetClaimsFromCtx(l.ctx)
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, errcode.ErrInvalidToken
 	}
 	userId := uint64(claims.UserID)
 
@@ -44,17 +45,17 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 	if err != nil {
 		if errors.Is(err, entity.ErrLinkNotFound) {
 			// 要更新的链接不存在
-			return nil, entity.ErrLinkNotFoundOrForbidden
+			return nil, errcode.ErrLinkNotFoundOrForbidden
 		}
 		// 其他数据库错误
 		l.Logger.Errorf("FindByCode error: %v", err)
-		return nil, err
+		return nil, errcode.ErrInternalError
 	}
 
 	// 3. 检查所有权 (DDD 核心：应用层执行授权策略)
 	if link.UserID != userId {
 		// 链接存在，但不属于你
-		return nil, entity.ErrLinkNotFoundOrForbidden
+		return nil, errcode.ErrLinkNotFoundOrForbidden
 	}
 
 	// 4. 检查是否为 "No-Op" (空操作)
@@ -85,7 +86,7 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 		//
 		l.Logger.Infof("UpdateDetails validation error: %v", err)
 		// 返回一个对用户友好的错误，可以考虑使用 httpx.NewCodeError
-		return nil, err
+		return nil, errcode.ErrInternalError
 	}
 
 	// 6. 调用仓储持久化 (Infrastructure)
@@ -94,7 +95,7 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 	//
 	if err := l.svcCtx.LinkRepo.Update(l.ctx, link); err != nil {
 		l.Logger.Errorf("LinkRepo.Update error: %v", err)
-		return nil, errors.New("failed to update link")
+		return nil, errcode.ErrInternalError
 	}
 
 	// 7. 返回更新后的 DTO

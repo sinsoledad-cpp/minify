@@ -139,6 +139,7 @@ service shortener { // 使用简洁的服务名
 	group:  shortener // 对应 /internal/handler/shortener
 	prefix: /api/v1 // 使用 API 版本前缀
 	jwt:    Auth // 引用 user-api.yaml 中的 Auth 配置
+    middleware: AuthzMiddleware
 )
 service shortener { // 使用简洁的服务名
 	// --- 链接管理 (CRUD) ---
