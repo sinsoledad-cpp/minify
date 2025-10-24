@@ -57,9 +57,10 @@ service user {
 }
 
 @server (
-	group:  user
-	prefix: /api/v1/user
-	jwt:    Auth
+	group:      user
+	prefix:     /api/v1/user
+	jwt:        Auth
+	middleware: AuthzMiddleware
 )
 service user {
 	@doc "获取当前登录用户信息"

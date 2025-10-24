@@ -32,20 +32,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取当前登录用户信息
-				Method:  http.MethodGet,
-				Path:    "/info",
-				Handler: user.GetUserInfoHandler(serverCtx),
-			},
-			{
-				// 用户登出
-				Method:  http.MethodPost,
-				Path:    "/logout",
-				Handler: user.LogoutHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthzMiddleware},
+			[]rest.Route{
+				{
+					// 获取当前登录用户信息
+					Method:  http.MethodGet,
+					Path:    "/info",
+					Handler: user.GetUserInfoHandler(serverCtx),
+				},
+				{
+					// 用户登出
+					Method:  http.MethodPost,
+					Path:    "/logout",
+					Handler: user.LogoutHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1/user"),
 	)

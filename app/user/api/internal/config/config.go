@@ -14,4 +14,8 @@ type Config struct {
 	Database struct {
 		DataSource string
 	}
+	Casbin struct {
+		ModelPath  string
+		PolicyPath string
+	}
 }
