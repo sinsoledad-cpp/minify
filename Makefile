@@ -1,5 +1,5 @@
-#goctl api go -api app/shortener/api/shortener.api -dir app/shortener/api -style gozero
-#goctl api go -api app/user/api/user.api -dir app/user/api -style gozero
+#goctl api go -api app/shortener/api/shortener.api -dir app/shortener/api -style gozero --home template
+#goctl api go -api app/user/api/user.api -dir app/user/api -style gozero --home template
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/shortener/rpc -c gen/go/shortener --style gozero
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/shortener/rpc --style=gozero  -c gen/go/shortener
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./app/shortener/rpc --style=gozero -c ./gen/go/shortener

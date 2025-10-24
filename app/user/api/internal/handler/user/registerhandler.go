@@ -4,7 +4,6 @@
 package user
 
 import (
-	"minify/common/utils/response"
 	"net/http"
 
 	"minify/app/user/api/internal/logic/user"
@@ -12,15 +11,16 @@ import (
 	"minify/app/user/api/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
+
+	"minify/common/utils/response"
 )
 
-// RegisterHandler 用户注册
+// 用户注册
 func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.RegisterRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			response.ClientError(r.Context(), w, response.RequestError, err.Error())
-			//httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
@@ -28,10 +28,8 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		resp, err := l.Register(&req)
 		if err != nil {
 			response.LogicError(r.Context(), w, err)
-			//httpx.ErrorCtx(r.Context(), w, err)
 		} else {
 			response.Ok(r.Context(), w, resp)
-			//httpx.OkJsonCtx(r.Context(), w, resp)
 		}
 	}
 }

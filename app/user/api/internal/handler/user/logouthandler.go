@@ -9,18 +9,18 @@ import (
 	"minify/app/user/api/internal/logic/user"
 	"minify/app/user/api/internal/svc"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
+	"minify/common/utils/response"
 )
 
-// LogoutHandler 用户登出
+// 用户登出
 func LogoutHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		l := user.NewLogoutLogic(r.Context(), svcCtx)
 		err := l.Logout()
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.LogicError(r.Context(), w, err)
 		} else {
-			httpx.Ok(w)
+			response.Ok(r.Context(), w, nil)
 		}
 	}
 }
