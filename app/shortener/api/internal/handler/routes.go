@@ -25,44 +25,47 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取单个链接的详细报表
-				Method:  http.MethodGet,
-				Path:    "/analytics/:code",
-				Handler: shortener.GetAnalyticsHandler(serverCtx),
-			},
-			{
-				// 获取仪表盘总览数据
-				Method:  http.MethodGet,
-				Path:    "/analytics/dashboard",
-				Handler: shortener.GetDashboardHandler(serverCtx),
-			},
-			{
-				// 创建短链接
-				Method:  http.MethodPost,
-				Path:    "/links",
-				Handler: shortener.CreateLinkHandler(serverCtx),
-			},
-			{
-				// 获取短链接列表 (分页)
-				Method:  http.MethodGet,
-				Path:    "/links",
-				Handler: shortener.ListLinksHandler(serverCtx),
-			},
-			{
-				// 更新短链接
-				Method:  http.MethodPut,
-				Path:    "/links/:code",
-				Handler: shortener.UpdateLinkHandler(serverCtx),
-			},
-			{
-				// 删除短链接 (软删除)
-				Method:  http.MethodDelete,
-				Path:    "/links/:code",
-				Handler: shortener.DeleteLinkHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthzMiddleware},
+			[]rest.Route{
+				{
+					// 获取单个链接的详细报表
+					Method:  http.MethodGet,
+					Path:    "/analytics/:code",
+					Handler: shortener.GetAnalyticsHandler(serverCtx),
+				},
+				{
+					// 获取仪表盘总览数据
+					Method:  http.MethodGet,
+					Path:    "/analytics/dashboard",
+					Handler: shortener.GetDashboardHandler(serverCtx),
+				},
+				{
+					// 创建短链接
+					Method:  http.MethodPost,
+					Path:    "/links",
+					Handler: shortener.CreateLinkHandler(serverCtx),
+				},
+				{
+					// 获取短链接列表 (分页)
+					Method:  http.MethodGet,
+					Path:    "/links",
+					Handler: shortener.ListLinksHandler(serverCtx),
+				},
+				{
+					// 更新短链接
+					Method:  http.MethodPut,
+					Path:    "/links/:code",
+					Handler: shortener.UpdateLinkHandler(serverCtx),
+				},
+				{
+					// 删除短链接 (软删除)
+					Method:  http.MethodDelete,
+					Path:    "/links/:code",
+					Handler: shortener.DeleteLinkHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)

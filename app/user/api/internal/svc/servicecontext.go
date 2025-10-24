@@ -43,7 +43,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	return &ServiceContext{
 		Config:          c,
-		UserRepo:        userRepo,
 		AuthzMiddleware: middleware.NewAuthzMiddleware(e).Handle,
+		UserRepo:        userRepo,
 	}
 }

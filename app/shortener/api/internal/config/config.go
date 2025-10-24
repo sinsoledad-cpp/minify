@@ -22,4 +22,8 @@ type Config struct {
 	Snowflake struct {
 		WorkerId int64
 	}
+	Casbin struct {
+		ModelPath  string
+		PolicyPath string
+	}
 }
