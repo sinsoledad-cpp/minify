@@ -7,3 +7,4 @@
 out
 common/gen
 
+/app/shortener/api/etc/GeoLite2-City.mmdb
