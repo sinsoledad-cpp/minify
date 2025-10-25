@@ -6,7 +6,6 @@ package shortener
 import (
 	"context"
 	"errors"
-	"minify/app/shortener/api/internal/logic"
 	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/domain/entity"
 	"minify/common/utils/jwtx"
@@ -66,7 +65,7 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 	if isNoOp {
 		// 如果没有提供任何可更新的字段，直接返回当前链接信息
 		return &types.UpdateLinkResponse{
-			Link: *logic.ToTypesLink(link), // ⭐ 使用 converter 转换
+			Link: *l.svcCtx.Converter.ToTypesLink(link), // ⭐ 使用 converter 转换
 		}, nil
 	}
 
@@ -100,6 +99,6 @@ func (l *UpdateLinkLogic) UpdateLink(req *types.UpdateLinkRequest) (resp *types.
 
 	// 7. 返回更新后的 DTO
 	return &types.UpdateLinkResponse{
-		Link: *logic.ToTypesLink(link), // ⭐ 使用 converter 转换
+		Link: *l.svcCtx.Converter.ToTypesLink(link), // ⭐ 使用 converter 转换
 	}, nil
 }

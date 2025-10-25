@@ -1,6 +1,7 @@
 Name: shortener
 Host: 0.0.0.0
-Port: 8888
+Port: 8887
+ShortDomain: "http://localhost:8887"
 
 Auth:
   AccessSecret: "a_secret_key_change_it_later" # 替换为你自己的 Secret

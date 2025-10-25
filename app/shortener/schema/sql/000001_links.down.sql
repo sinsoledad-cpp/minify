@@ -2,7 +2,7 @@
 -- 职责: 存储短码和长链接的映射，支持软删除和高效的列表过滤。
 
 CREATE TABLE `links` (
-                         `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                         `id` BIGINT UNSIGNED AUTO_INCREMENT ,
                          `user_id` BIGINT UNSIGNED NOT NULL COMMENT '创建者ID，关联 users(id)',
                          `short_code` VARCHAR(16) NOT NULL COMMENT '短链接码 (e.g., aZ89bC)',
                          `original_url` TEXT NOT NULL COMMENT '原始长链接',

@@ -6,7 +6,6 @@ package shortener
 import (
 	"context"
 	"errors"
-	"minify/app/shortener/api/internal/logic"
 	"minify/common/utils/jwtx"
 
 	"minify/app/shortener/api/internal/svc"
@@ -63,7 +62,7 @@ func (l *ListLinksLogic) ListLinks(req *types.ListLinksRequest) (resp *types.Lis
 	dtoLinks := make([]types.Link, len(links))
 	for i, linkEntity := range links {
 		// 注意：converter 在上一级 logic 包中
-		dtoLink := logic.ToTypesLink(linkEntity)
+		dtoLink := l.svcCtx.Converter.ToTypesLink(linkEntity)
 		if dtoLink != nil {
 			dtoLinks[i] = *dtoLink
 		}

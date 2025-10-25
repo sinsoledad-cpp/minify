@@ -18,7 +18,8 @@
 #user
 #migrate  create -ext sql -dir schema/sql/user -seq create_short_urls_table
 databaseURL="mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
-# migrate -path="./app/user/schema/sql/000001_users.up.sql" -database="mysql://root:root@tcp(localhost:3306)/lucid?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai" -verbose up
+# migrate -path="./app/user/schema/sql/000001_users.up.sql" -database="mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai" -verbose up
+# migrate -path="./app/shortener/schema/sql/" -database="mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai" -verbose up
 migrate_up:
 	migrate -path="./app/user/schema/sql/000001_users.up.sql" -database=${databaseURL} -verbose up
 migrate_drop:

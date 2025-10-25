@@ -3,11 +3,26 @@ package logic
 import (
 	"minify/app/shortener/api/internal/types"
 	"minify/app/shortener/domain/entity"
+	"strings"
 	"time"
 )
 
+// ⭐ 2. 定义 Converter 结构体，它持有依赖
+type Converter struct {
+	ShortDomain string
+}
+
+// ⭐ 3. 提供一个 NewConverter 的工厂函数
+func NewConverter(shortDomain string) *Converter {
+	// 确保域名最后没有 /
+	domain := strings.TrimSuffix(shortDomain, "/")
+	return &Converter{
+		ShortDomain: domain,
+	}
+}
+
 // ToTypesLink 将 Link 实体转换为 Link DTO
-func ToTypesLink(e *entity.Link) *types.Link {
+func (c *Converter) ToTypesLink(e *entity.Link) *types.Link {
 	if e == nil {
 		return nil
 	}
@@ -20,7 +35,7 @@ func ToTypesLink(e *entity.Link) *types.Link {
 
 	return &types.Link{
 		Id:             e.ID,
-		ShortCode:      e.ShortCode,
+		ShortCode:      c.ShortDomain + "/" + e.ShortCode,
 		OriginalUrl:    e.OriginalUrl,
 		VisitCount:     int64(e.VisitCount), // 类型转换
 		IsActive:       e.IsActive,

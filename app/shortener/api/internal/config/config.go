@@ -11,7 +11,8 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Auth struct {
+	ShortDomain string
+	Auth        struct {
 		AccessSecret string
 		AccessExpire int64
 	}

@@ -6,7 +6,6 @@ package shortener
 import (
 	"context"
 	"errors"
-	"minify/app/shortener/api/internal/logic"
 	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
@@ -85,7 +84,7 @@ func (l *CreateLinkLogic) CreateLink(req *types.CreateLinkRequest) (resp *types.
 
 	// 5. 转换 DTO 并返回
 	// (确保 converter.go 也在 logic/shortener 目录下)
-	dtoLink := logic.ToTypesLink(link)
+	dtoLink := l.svcCtx.Converter.ToTypesLink(link)
 
 	return &types.CreateLinkResponse{
 		Link: *dtoLink,

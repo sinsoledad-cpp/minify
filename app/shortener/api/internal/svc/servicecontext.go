@@ -5,6 +5,7 @@ package svc
 
 import (
 	"minify/app/shortener/api/internal/config"
+	"minify/app/shortener/api/internal/logic"
 	"minify/app/shortener/data/model"
 	"minify/app/shortener/domain/repository"
 	"minify/app/shortener/domain/service"
@@ -27,6 +28,7 @@ type ServiceContext struct {
 	AnalyticsRepo      repository.AnalyticsRepository      // ⭐ 注入 Analytics 仓储接口
 	LinkAccessLogsRepo repository.LinkAccessLogsRepository // ⭐ 注入日志仓储接口
 	IdGenerator        service.IdGenerator
+	Converter          *logic.Converter
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -57,6 +59,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err != nil {
 		logx.Must(err) // 初始化失败，直接 panic
 	}
+	converter := logic.NewConverter(c.ShortDomain)
 	return &ServiceContext{
 		Config:             c,
 		LinkEventProducer:  kq.NewPusher(c.LinkEventProducer.Brokers, c.LinkEventProducer.Topic),
@@ -65,5 +68,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AnalyticsRepo:      analyticsRepo,
 		LinkAccessLogsRepo: linkAccessLogsRepo,
 		IdGenerator:        idGen,
+		Converter:          converter,
 	}
 }

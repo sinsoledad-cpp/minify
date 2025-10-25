@@ -61,6 +61,6 @@ func (l *GetDashboardLogic) GetDashboard(req *types.GetDashboardRequest) (resp *
 	return &types.GetDashboardResponse{
 		TotalLinks:  summary.TotalLinks,
 		TotalClicks: summary.TotalClicks,
-		TopLink:     logic.ToTypesLink(summary.TopLink), // ⭐ 使用 converter
+		TopLink:     l.svcCtx.Converter.ToTypesLink(summary.TopLink), // ⭐ 使用 converter
 	}, nil
 }
