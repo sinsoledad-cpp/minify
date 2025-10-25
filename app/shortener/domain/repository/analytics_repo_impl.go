@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	// "github.com/zeromicro/go-zero/core/stores/sqlx" // 如果自定义SQL移到model层，不再需要
 )
 
@@ -202,6 +203,57 @@ func (r *analyticsRepoImpl) GetTopLink(ctx context.Context, userId *uint64, star
 	// ⭐ 使用 link_repo_impl.go 中定义的 fromModel 函数 (需要确保它在该包可见)
 	// 或者在这里重新定义一个私有的转换函数
 	return fromModelLinks(linkPO), nil
+}
+
+func (r *analyticsRepoImpl) IncrementDimensions(ctx context.Context, linkID int64, date time.Time, dims *entity.AnalyticsDimensions) error {
+	// 1. 从 summaryModel 获取原始连接
+	conn, err := r.summaryModel.RawConn()
+	if err != nil {
+		logx.WithContext(ctx).Errorf("IncrementDimensions: failed to get raw conn: %v", err)
+		return err
+	}
+
+	// 2. 在一个事务中执行所有 Upsert
+	err = conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+
+		// ⭐ 3. (核心修改) 创建一个绑定到此事务的新 model 实例
+		// txModel 内部的 conn 现在是 session
+		txModel := r.summaryModel.WithSession(session)
+
+		// ⭐ 4. (核心修改) 调用新 model 实例的方法 (不再需要传入 session)
+		// 这些调用现在会自动在事务 (session) 上执行
+
+		// 1. 聚合 'total'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimTotal, "total"); err != nil {
+			return err
+		}
+		// 2. 聚合 'referer'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimReferer, dims.Referer); err != nil {
+			return err
+		}
+		// 3. 聚合 'country'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimCountry, dims.Country); err != nil {
+			return err
+		}
+		// 4. 聚合 'browser'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimBrowser, dims.Browser); err != nil {
+			return err
+		}
+		// 5. 聚合 'os'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimOS, dims.OS); err != nil {
+			return err
+		}
+		// 6. 聚合 'device'
+		if err := txModel.UpsertClickCount(ctx, uint64(linkID), date, entity.DimDevice, dims.Device); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		logx.WithContext(ctx).Errorf("IncrementDimensions: transaction failed for linkID %d: %v", linkID, err)
+	}
+	return err
 }
 
 // --- 辅助函数 ---

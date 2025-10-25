@@ -35,3 +35,24 @@ type DashboardSummary struct {
 	TotalClicks int64
 	TopLink     *Link // 引用 Link 实体
 }
+
+// ⭐ (新增) AnalyticsDimensions 封装了从事件中解析出的维度
+type AnalyticsDimensions struct {
+	Referer string
+	Country string
+	Browser string
+	OS      string
+	Device  string
+	// 还可以添加 'hourly' (小时)
+	// Hour string
+}
+
+// (新增) 定义维度类型常量，与数据库 `dimension_type` 字段对应
+const (
+	DimTotal   = "total"
+	DimReferer = "referer"
+	DimCountry = "country"
+	DimBrowser = "browser"
+	DimOS      = "os"
+	DimDevice  = "device"
+)

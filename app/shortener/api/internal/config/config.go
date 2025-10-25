@@ -31,5 +31,6 @@ type Config struct {
 		Brokers []string
 		Topic   string
 	}
-	LinkEventConsumer kq.KqConf
+	LinkEventConsumer      kq.KqConf
+	AnalyticsEventConsumer kq.KqConf
 }

@@ -18,10 +18,13 @@ type (
 	AnalyticsSummaryDailyModel interface {
 		analyticsSummaryDailyModel
 		withSession(session sqlx.Session) AnalyticsSummaryDailyModel
+		WithSession(session sqlx.Session) AnalyticsSummaryDailyModel
 		FindSummariesByLinkID(ctx context.Context, linkId uint64, startDate, endDate time.Time) ([]*AnalyticsSummaryDaily, error)
 		FindTotalClicks(ctx context.Context, userId *uint64, startDate, endDate time.Time, linksTable string) (int64, error)
 		FindTopClickedLinkID(ctx context.Context, userId *uint64, startDate, endDate time.Time, linksTable string) (uint64, error)
-		TableName() string // ⭐ 暴露 TableName 接口
+		TableName() string                                                                                   // ⭐ 暴露 TableName 接口
+		RawConn() (sqlx.SqlConn, error)                                                                      // ⭐ 2. (新增) 添加 RawConn 接口
+		UpsertClickCount(ctx context.Context, linkID uint64, date time.Time, dimType, dimValue string) error // ⭐ 3. (新增) 添加 Upsert 接口
 	}
 
 	customAnalyticsSummaryDailyModel struct {
@@ -37,6 +40,13 @@ func NewAnalyticsSummaryDailyModel(conn sqlx.SqlConn) AnalyticsSummaryDailyModel
 }
 
 func (m *customAnalyticsSummaryDailyModel) withSession(session sqlx.Session) AnalyticsSummaryDailyModel {
+	// ⭐ 5. (关键) goctl 自动生成的 withSession 会返回一个*新*的 model 实例
+	// 这个新实例的 conn 字段是 NewSqlConnFromSession(session)，它*不是* sqlx.Session 类型
+	// 而是 sqlx.SqlConn 的一个实现，它内部封装了 session。
+	return NewAnalyticsSummaryDailyModel(sqlx.NewSqlConnFromSession(session))
+}
+func (m *customAnalyticsSummaryDailyModel) WithSession(session sqlx.Session) AnalyticsSummaryDailyModel {
+	//
 	return NewAnalyticsSummaryDailyModel(sqlx.NewSqlConnFromSession(session))
 }
 
@@ -121,4 +131,31 @@ func (m *customAnalyticsSummaryDailyModel) FindTopClickedLinkID(ctx context.Cont
 // ⭐ 暴露 TableName (goctl 已在 default model 中生成了小写的 tableName 方法)
 func (m *customAnalyticsSummaryDailyModel) TableName() string {
 	return m.table // 直接返回嵌入的 default model 的 table 字段
+}
+
+// ⭐ 4. (新增) 实现 RawConn
+func (m *customAnalyticsSummaryDailyModel) RawConn() (sqlx.SqlConn, error) {
+	if m.conn == nil {
+		return nil, errors.New("raw connection is not available")
+	}
+	return m.conn, nil
+}
+
+// ⭐ 5. (新增) 实现 UpsertClickCount
+// (session sqlx.SqlConn) 可以接收 m.conn (普通连接) 或 sqlx.Session (事务)
+func (m *customAnalyticsSummaryDailyModel) UpsertClickCount(ctx context.Context, linkID uint64, date time.Time, dimType, dimValue string) error {
+	query := fmt.Sprintf(`
+        INSERT INTO %s (link_id, date, dimension_type, dimension_value, click_count)
+        VALUES (?, ?, ?, ?, 1)
+        ON DUPLICATE KEY UPDATE click_count = click_count + 1
+    `, m.table)
+
+	dateStr := date.Format(time.DateOnly)
+
+	if dimValue == "" {
+		dimValue = "unknown"
+	}
+
+	_, err := m.conn.ExecCtx(ctx, query, linkID, dateStr, dimType, dimValue)
+	return err
 }

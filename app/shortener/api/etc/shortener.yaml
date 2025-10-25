@@ -38,3 +38,13 @@ LinkEventConsumer:
   Consumers: 6          # ⭐ 3. 添加 Consumers: 建议设置为 Topic 的分区数 (你设置了 6)
   Processors: 16         # ⭐ 4. 添加 Processors: 处理消息的 worker 数量，可以比 Consumers 多，以提高并发处理能力
   # MinBytes 和 MaxBytes 等其他参数可以按需添加，这里使用默认值
+
+AnalyticsEventConsumer:
+  Name: analytics-event-consumer
+  Brokers:
+    - "localhost:9092"
+  Group: "shortener-analytics-group" # <--- 这是组 2 (聚合)
+  Topic: "shortener_link_accessed"     # <--- 监听同一个 Topic
+  Offset: last
+  Consumers: 6          # 建议与 LinkEventConsumer 保持一致
+  Processors: 16

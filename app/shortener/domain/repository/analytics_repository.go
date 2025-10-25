@@ -19,4 +19,6 @@ type AnalyticsRepository interface {
 
 	// GetTopLink 获取点击量最高的链接 (供 Dashboard 使用)
 	GetTopLink(ctx context.Context, userId *uint64, startDate, endDate time.Time) (*entity.Link, error) // ⭐ 返回 *entity.Link
+
+	IncrementDimensions(ctx context.Context, linkID int64, date time.Time, dims *entity.AnalyticsDimensions) error
 }

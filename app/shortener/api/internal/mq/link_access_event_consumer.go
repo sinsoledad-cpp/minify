@@ -5,20 +5,9 @@ import (
 	"encoding/json"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/domain/entity"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
-
-// LinkAccessEvent 对应生产者 (RedirectLogic) 发送的消息结构
-type LinkAccessEvent struct {
-	ShortCode  string    `json:"shortCode"`
-	LinkID     int64     `json:"linkId"`
-	AccessedAt time.Time `json:"accessedAt"`
-	IpAddress  string    `json:"ipAddress"`
-	UserAgent  string    `json:"userAgent"`
-	Referer    string    `json:"referer"`
-}
 
 // LinkAccessEventConsumer 是处理链接访问事件的消费者
 type LinkAccessEventConsumer struct {
