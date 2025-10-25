@@ -3,7 +3,8 @@ Host: 0.0.0.0
 Port: 8888
 
 Auth:
-  AccessSecret: "a_secret_key_change_it_later" # ⭐ 必须与 user-api.yaml 中的 Secret 保持一致
+  AccessSecret: "a_secret_key_change_it_later" # 替换为你自己的 Secret
+  AccessExpire: 86400 # 24 小时
 
 Database:
   DataSource: "root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=True&loc=Local" # ⭐ 你的数据库连接 DSN (注意数据库名可能是 minify 或 lucid)
