@@ -19,14 +19,14 @@ import (
 )
 
 type ServiceContext struct {
-	Config            config.Config
-	AuthzMiddleware   rest.Middleware
-	LinkEventProducer *kq.Pusher
-	LinkEventConsumer kq.KqConf
-	//RedisClient   *redis.Redis                   // ⭐ Redis 客户端 (主要供 links 缓存使用)
-	LinkRepo      repository.LinkRepository      // ⭐ 注入 Link 仓储接口
-	AnalyticsRepo repository.AnalyticsRepository // ⭐ 注入 Analytics 仓储接口
-	IdGenerator   service.IdGenerator
+	Config             config.Config
+	AuthzMiddleware    rest.Middleware
+	LinkEventProducer  *kq.Pusher
+	LinkEventConsumer  kq.KqConf
+	LinkRepo           repository.LinkRepository           // ⭐ 注入 Link 仓储接口
+	AnalyticsRepo      repository.AnalyticsRepository      // ⭐ 注入 Analytics 仓储接口
+	LinkAccessLogsRepo repository.LinkAccessLogsRepository // ⭐ 注入日志仓储接口
+	IdGenerator        service.IdGenerator
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -36,10 +36,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 2. 初始化 goctl models (linksModel 需要 c.CacheRedis)
 	linksModel := model.NewLinksModel(conn, c.CacheRedis)
 	summaryModel := model.NewAnalyticsSummaryDailyModel(conn)
-
+	linkAccessLogsModel := model.NewLinkAccessLogsModel(conn)
 	// 3. 初始化 data.repository 实现
 	linkRepo := repository.NewLinkRepoImpl(linksModel)
 	analyticsRepo := repository.NewAnalyticsRepoImpl(summaryModel, linksModel)
+	linkAccessLogsRepo := repository.NewLinkAccessLogsRepoImpl(linkAccessLogsModel)
 
 	idGen, err := snowflake.NewGenerator(c.Snowflake.WorkerId)
 
@@ -57,11 +58,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		logx.Must(err) // 初始化失败，直接 panic
 	}
 	return &ServiceContext{
-		Config:            c,
-		LinkEventProducer: kq.NewPusher(c.LinkEventProducer.Brokers, c.LinkEventProducer.Topic),
-		AuthzMiddleware:   middleware.NewAuthzMiddleware(e).Handle,
-		LinkRepo:          linkRepo,
-		AnalyticsRepo:     analyticsRepo,
-		IdGenerator:       idGen,
+		Config:             c,
+		LinkEventProducer:  kq.NewPusher(c.LinkEventProducer.Brokers, c.LinkEventProducer.Topic),
+		AuthzMiddleware:    middleware.NewAuthzMiddleware(e).Handle,
+		LinkRepo:           linkRepo,
+		AnalyticsRepo:      analyticsRepo,
+		LinkAccessLogsRepo: linkAccessLogsRepo,
+		IdGenerator:        idGen,
 	}
 }
