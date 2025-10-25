@@ -63,18 +63,21 @@ services:
       # INTERNAL: 用于内部容器间（Kafka与Kafdrop）通信
       # CONTROLLER: 用于KRaft控制器通信
       - KAFKA_CFG_LISTENERS=EXTERNAL://:9092,INTERNAL://:29092,CONTROLLER://:9093
-
       # 3.【关键修改】对外公告的地址
       # EXTERNAL 公告为 localhost，供您的主机Go程序使用
       # INTERNAL 公告为 kafka服务名+内部端口，供Kafdrop使用
       - KAFKA_CFG_ADVERTISED_LISTENERS=EXTERNAL://localhost:9092,INTERNAL://kafka:29092
-
       # 安全协议映射（增加了EXTERNAL）
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-
       # Broker间通信使用内部监听器
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+
+      # Topic 策略配置
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true # 1. 允许自动创建 Topic (开发方便, 生产建议 false)
+      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true # 2. 允许删除 Topic (开发方便)
+      - KAFKA_CFG_NUM_PARTITIONS=6 # 3. 自动创建 Topic 时的默认分区数 (关键)
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1 # 4. 自动创建 Topic 时的默认副本数 (单节点必须为 1)
     networks:
       - net01
 

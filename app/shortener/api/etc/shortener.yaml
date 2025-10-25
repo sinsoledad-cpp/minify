@@ -22,3 +22,19 @@ Snowflake:
 Casbin:
   ModelPath: "etc/rbac_model.conf"  # 指向项目根目录的 etc
   PolicyPath: "etc/policy.csv"    # 指向项目根目录的 etc
+
+LinkEventProducer:
+  Brokers:
+    - "localhost:9092" # 对应你的 docker-compose.yml
+  Topic: "shortener_link_accessed" # ⭐ 使用你选择的 Topic 名
+
+LinkEventConsumer:
+  Name: link-event-consumer # ⭐ 1. 添加消费者名称 (自定义)
+  Brokers:
+    - "localhost:9092"         # 和 API 配置一致
+  Group: "shortener-job-group"   # ⭐ 消费者组名称
+  Topic: "shortener_link_accessed" # 和 API 配置一致
+  Offset: last         # ⭐ 2. 添加 Offset: 'first' 表示从最早的消息开始消费 (如果组是新的)，'last' 表示从最新的消息开始
+  Consumers: 6          # ⭐ 3. 添加 Consumers: 建议设置为 Topic 的分区数 (你设置了 6)
+  Processors: 16         # ⭐ 4. 添加 Processors: 处理消息的 worker 数量，可以比 Consumers 多，以提高并发处理能力
+  # MinBytes 和 MaxBytes 等其他参数可以按需添加，这里使用默认值

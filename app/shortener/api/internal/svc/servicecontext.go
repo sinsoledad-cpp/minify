@@ -12,14 +12,17 @@ import (
 	"minify/common/service/snowflake"
 
 	"github.com/casbin/casbin/v2"
+	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 )
 
 type ServiceContext struct {
-	Config          config.Config
-	AuthzMiddleware rest.Middleware
+	Config            config.Config
+	AuthzMiddleware   rest.Middleware
+	LinkEventProducer *kq.Pusher
+	LinkEventConsumer kq.KqConf
 	//RedisClient   *redis.Redis                   // ⭐ Redis 客户端 (主要供 links 缓存使用)
 	LinkRepo      repository.LinkRepository      // ⭐ 注入 Link 仓储接口
 	AnalyticsRepo repository.AnalyticsRepository // ⭐ 注入 Analytics 仓储接口
@@ -54,10 +57,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		logx.Must(err) // 初始化失败，直接 panic
 	}
 	return &ServiceContext{
-		Config:          c,
-		AuthzMiddleware: middleware.NewAuthzMiddleware(e).Handle,
-		LinkRepo:        linkRepo,
-		AnalyticsRepo:   analyticsRepo,
-		IdGenerator:     idGen,
+		Config:            c,
+		LinkEventProducer: kq.NewPusher(c.LinkEventProducer.Brokers, c.LinkEventProducer.Topic),
+		AuthzMiddleware:   middleware.NewAuthzMiddleware(e).Handle,
+		LinkRepo:          linkRepo,
+		AnalyticsRepo:     analyticsRepo,
+		IdGenerator:       idGen,
 	}
 }

@@ -4,6 +4,7 @@
 package config
 
 import (
+	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/rest"
 )
@@ -26,4 +27,9 @@ type Config struct {
 		ModelPath  string
 		PolicyPath string
 	}
+	LinkEventProducer struct {
+		Brokers []string
+		Topic   string
+	}
+	LinkEventConsumer kq.KqConf
 }

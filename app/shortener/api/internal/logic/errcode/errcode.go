@@ -13,6 +13,7 @@ var (
 	// --- 链接管理 (11101+) ---
 	ErrCustomCodeExists = response.NewBizError(11101, "自定义短码已存在")
 	ErrLinkExpired      = response.NewBizError(11102, "链接已过期")
+	ErrLinkNotFound     = response.NewBizError(11103, "链接不存在")
 
 	// --- 内部错误 (11500+) ---
 	ErrInternalError   = response.NewBizError(11500, "服务器内部错误")
