@@ -5,23 +5,23 @@ import (
 	"encoding/json"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/domain/entity"
-	"net" // ⭐ 1. 导入 net 包
+	"net"     // (不变)
+	"net/url" // (不变)
 
-	"github.com/oschwald/geoip2-golang"    // ⭐ 2. 导入 geoip2
-	"github.com/ua-parser/uap-go/uaparser" // ⭐ 3. 导入 uaparser
+	"github.com/oschwald/geoip2-golang"    // (不变)
+	"github.com/ua-parser/uap-go/uaparser" // (不变)
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// AnalyticsEventConsumer 是处理聚合分析的消费者
+// (AnalyticsEventConsumer 结构体... 保持不变)
 type AnalyticsEventConsumer struct {
-	ctx    context.Context
-	svcCtx *svc.ServiceContext
-	// ⭐ 4. 添加解析器实例
+	ctx      context.Context
+	svcCtx   *svc.ServiceContext
 	uaParser *uaparser.Parser
 	geoIPDB  *geoip2.Reader
 }
 
-// NewAnalyticsEventConsumer 创建一个新的消费者实例
+// (NewAnalyticsEventConsumer 函数... 保持不变)
 func NewAnalyticsEventConsumer(ctx context.Context, svcCtx *svc.ServiceContext) *AnalyticsEventConsumer {
 	// ⭐ 5. 在构造函数中初始化解析器
 	// 我们假设 goctl 启动时的工作目录是项目根目录
@@ -45,8 +45,8 @@ func NewAnalyticsEventConsumer(ctx context.Context, svcCtx *svc.ServiceContext) 
 	return &AnalyticsEventConsumer{
 		ctx:      ctx,
 		svcCtx:   svcCtx,
-		uaParser: ua, // ⭐ 6. 注入实例
-		geoIPDB:  db, // ⭐ 6. 注入实例
+		uaParser: ua,
+		geoIPDB:  db,
 	}
 }
 
@@ -61,48 +61,66 @@ func (l *AnalyticsEventConsumer) Consume(ctx context.Context, key, val string) e
 	}
 
 	// --- 1. (核心) 解析 IP 和 UserAgent ---
-	// (已移除 city 变量)
+
+	// ⭐ 改进：所有维度首先默认为 "unknown"
 	country := "unknown"
+	referer := "unknown"
 	browser := "unknown"
 	os := "unknown"
 	device := "unknown"
-	referer := "unknown"
 
-	// a. 解析 IP 地址
+	// --- 1a. 处理 Country ---
 	if event.IpAddress != "" {
 		ip := net.ParseIP(event.IpAddress)
 		if ip != nil {
-			// 仍然使用 City() 方法，因为它包含 Country 信息
-			record, err := l.geoIPDB.City(ip)
-			if err == nil && record != nil {
-				if record.Country.Names["en"] != "" {
+			if ip.IsLoopback() || ip.IsPrivate() {
+				country = "Local Network" // 明确标记本地/私有网络
+			} else {
+				record, err := l.geoIPDB.City(ip)
+				if err == nil && record != nil && record.Country.Names["en"] != "" {
 					country = record.Country.Names["en"]
 				}
-				// (已移除 city 的提取逻辑)
+				// (如果 GeoIP 查询失败, 保持 "unknown")
 			}
+		}
+		// (如果 IP 解析失败, 保持 "unknown")
+	}
+
+	// --- 1b. 处理 Referer ---
+	if event.Referer == "" {
+		referer = "Direct Entry" // 明确标记直接访问
+	} else {
+		parsedUrl, err := url.Parse(event.Referer)
+		if err == nil && parsedUrl.Hostname() != "" {
+			referer = parsedUrl.Hostname() // 提取域名
+		} else {
+			referer = "Invalid Referer" // 标记无效的 Referer
 		}
 	}
 
-	// b. 解析 User Agent
+	// --- 1c. 处理 User Agent (Browser, OS, Device) ---
 	if event.UserAgent != "" {
 		client := l.uaParser.Parse(event.UserAgent)
+
+		// 浏览器
 		if client.UserAgent.Family != "Other" && client.UserAgent.Family != "" {
 			browser = client.UserAgent.Family
 		}
+
+		// 操作系统
 		if client.Os.Family != "Other" && client.Os.Family != "" {
 			os = client.Os.Family
 		}
-		if client.Device.Family != "Other" && client.Device.Family != "" {
-			device = client.Device.Family
-		}
-	}
 
-	// c. 处理 Referer
-	if event.Referer != "" {
-		referer = event.Referer
-		// 你未来可以在这里添加域名提取逻辑
+		// 设备
+		if client.Device.Family != "Other" && client.Device.Family != "" {
+			device = client.Device.Family // 明确的设备 (e.g., "iPhone")
+		} else if client.Device.Family == "Other" {
+			// "Other" 是 uap-go 对 PC/Mac/Linux 桌面端的通用标识
+			device = "Desktop"
+		}
+		// (如果 Family 是 "", 保持 "unknown")
 	}
-	// 如果 Referer 为空，它将保持 "unknown"
 
 	// --- 2. 构造维度实体 ---
 	dims := &entity.AnalyticsDimensions{
@@ -114,8 +132,6 @@ func (l *AnalyticsEventConsumer) Consume(ctx context.Context, key, val string) e
 	}
 
 	// --- 3. 调用仓储执行聚合 ---
-	// 仓储层 (analytics_repo_impl.go) 已经实现了事务处理
-	// 我们使用 event.AccessedAt 作为聚合的 'date'
 	if err := l.svcCtx.AnalyticsRepo.IncrementDimensions(ctx, event.LinkID, event.AccessedAt, dims); err != nil {
 		logx.WithContext(ctx).Errorf("Analytics Consumer: Failed to increment dimensions for linkID %d: %v", event.LinkID, err)
 		return err // 返回错误，消息将被重试
