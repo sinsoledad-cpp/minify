@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"minify/app/shortener/api/internal/logic/errcode"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
@@ -53,6 +54,7 @@ func (l *RedirectLogic) Redirect(req *types.RedirectRequest, ip, ua, referer str
 	// 3. (TODO) ⭐ 使用 GoSafeCtx 异步发送 Kafka 日志
 	// 这会安全地启动一个 goroutine，并自动处理 panic
 	threading.GoSafeCtx(l.ctx, func() {
+		fmt.Println("异步处理访问事件")
 		l.logAccessEvent(l.ctx, link, ip, ua, referer)
 	})
 

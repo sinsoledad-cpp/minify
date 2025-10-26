@@ -6,12 +6,13 @@ package shortener
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"minify/app/shortener/api/internal/logic/shortener"
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
 
 	"minify/common/utils/response"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 // 获取短链接列表 (分页)
