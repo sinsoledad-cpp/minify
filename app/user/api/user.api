@@ -39,6 +39,18 @@ type (
 	}
 )
 
+// --- (新增) Admin 模块的类型定义 ---
+type (
+	ListUsersRequest {
+		Page     int `json:"page,optional"` // 页码, 默认 1
+		PageSize int `json:"pageSize,optional"` // 每页数量, 默认 20
+	}
+	ListUsersResponse {
+		Users []UserInfoResponse `json:"users"`
+		Total int64              `json:"total"`
+	}
+)
+
 // -------------------
 // 服务路由定义
 // -------------------
@@ -70,5 +82,18 @@ service user {
 	@doc "用户登出"
 	@handler logout
 	post /logout
+}
+
+// --- (新增) Admin 路由块 ---
+@server (
+	group:      admin // <--- 新的 group
+	prefix:     /api/v1/admin
+	jwt:        Auth
+	middleware: AuthzMiddleware // <--- 同样应用 Casbin 中间件
+)
+service user {
+	@doc "获取所有用户列表 (管理员)"
+	@handler listUsers
+	get /users (ListUsersRequest) returns (ListUsersResponse)
 }
 

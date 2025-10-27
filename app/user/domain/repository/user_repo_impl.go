@@ -121,3 +121,40 @@ func (r *userRepoImpl) FindByID(ctx context.Context, id int64) (*entity.User, er
 	}
 	return fromModel(po), nil
 }
+
+// (新增) ListAll 实现
+func (r *userRepoImpl) ListAll(ctx context.Context, page, pageSize int) ([]*entity.User, int64, error) {
+	// 1. 获取总数
+	total, err := r.userModel.CountAll(ctx)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("userRepoImpl.ListAll CountAll error: %v", err)
+		return nil, 0, err
+	}
+	if total == 0 {
+		return []*entity.User{}, 0, nil
+	}
+
+	// 2. 计算 offset
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20 // 默认值
+	}
+	offset := (page - 1) * pageSize
+
+	// 3. 查询分页数据
+	pos, err := r.userModel.FindAll(ctx, offset, pageSize)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("userRepoImpl.ListAll FindAll error: %v", err)
+		return nil, 0, err
+	}
+
+	// 4. 转换 PO -> Entity
+	entities := make([]*entity.User, len(pos))
+	for i, po := range pos {
+		entities[i] = fromModel(po)
+	}
+
+	return entities, total, nil
+}

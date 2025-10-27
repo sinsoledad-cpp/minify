@@ -13,4 +13,7 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, email string) (*entity.User, error)
 	FindByID(ctx context.Context, id int64) (*entity.User, error)
 	// Update(ctx context.Context, user *entity.User) error
+
+	// (新增) 分页获取所有用户
+	ListAll(ctx context.Context, page, pageSize int) ([]*entity.User, int64, error)
 }

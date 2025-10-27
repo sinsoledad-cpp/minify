@@ -3,6 +3,16 @@
 
 package types
 
+type ListUsersRequest struct {
+	Page     int `json:"page,optional"`     // 页码, 默认 1
+	PageSize int `json:"pageSize,optional"` // 每页数量, 默认 20
+}
+
+type ListUsersResponse struct {
+	Users []UserInfoResponse `json:"users"`
+	Total int64              `json:"total"`
+}
+
 type LoginRequest struct {
 	Username string `json:"username"` // 可以是用户名或邮箱
 	Password string `json:"password"`

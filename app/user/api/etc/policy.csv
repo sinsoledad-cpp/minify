@@ -9,6 +9,7 @@ p, user, /api/v1/user/logout, POST
 # 这里只放 "admin" 能做而 "user" 不能做的权限
 # p, admin, /api/v1/admin/users, GET
 # p, admin, /api/v1/admin/users/:id/role, PUT
+p, admin, /api/v1/admin/users, GET
 
 # --- 角色继承 (Grouping) ---
 # 关键: "admin" 角色继承 "user" 角色的所有权限

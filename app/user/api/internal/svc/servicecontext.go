@@ -5,6 +5,7 @@ package svc
 
 import (
 	"minify/app/user/api/internal/config"
+	"minify/app/user/api/internal/logic"
 	"minify/app/user/data/model"
 	"minify/app/user/domain/repository"
 	datarepo "minify/app/user/domain/repository"
@@ -20,6 +21,7 @@ type ServiceContext struct {
 	Config          config.Config
 	AuthzMiddleware rest.Middleware
 	UserRepo        repository.UserRepository
+	Converter       *logic.Converter
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -41,9 +43,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err := e.LoadPolicy(); err != nil {
 		logx.Must(err)
 	}
+	converter := logic.NewConverter()
 	return &ServiceContext{
 		Config:          c,
 		AuthzMiddleware: middleware.NewAuthzMiddleware(e).Handle,
 		UserRepo:        userRepo,
+		Converter:       converter,
 	}
 }

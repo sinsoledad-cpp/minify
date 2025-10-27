@@ -6,6 +6,7 @@ package handler
 import (
 	"net/http"
 
+	admin "minify/app/user/api/internal/handler/admin"
 	user "minify/app/user/api/internal/handler/user"
 	"minify/app/user/api/internal/svc"
 
@@ -13,6 +14,22 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthzMiddleware},
+			[]rest.Route{
+				{
+					// 获取所有用户列表 (管理员)
+					Method:  http.MethodGet,
+					Path:    "/users",
+					Handler: admin.ListUsersHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin"),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{
