@@ -30,3 +30,7 @@ migrate_drop:
 #goctl rpc protoc protos/shortener/v1/shortener.proto --go_out=. --go-grpc_out=. --zrpc_out=./gen/go --style gozero
 
 # goctl template init --home template
+
+
+#migrate -path="./app/user/schema/sql" -database="mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai&x-migrations-table=user_schema_migrations" -verbose up
+#migrate -path="./app/shortener/schema/sql" -database="mysql://root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai&x-migrations-table=shortener_schema_migrations" -verbose up
