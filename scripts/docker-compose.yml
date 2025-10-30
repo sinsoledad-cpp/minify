@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 #    privileged: true # 特权模式
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: root

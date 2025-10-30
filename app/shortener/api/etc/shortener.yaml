@@ -8,7 +8,7 @@ Auth:
   AccessExpire: 86400 # 24 小时
 
 Database:
-  DataSource: "root:root@tcp(localhost:3306)/minify?charset=utf8mb4&parseTime=True&loc=Local" # ⭐ 你的数据库连接 DSN (注意数据库名可能是 minify 或 lucid)
+  DataSource: "root:root@tcp(localhost:3307)/minify?charset=utf8mb4&parseTime=True&loc=Local" # ⭐ 你的数据库连接 DSN (注意数据库名可能是 minify 或 lucid)
 
 CacheRedis: # ⭐ Redis 配置 (用于 links 缓存)
   - Host: localhost:6379

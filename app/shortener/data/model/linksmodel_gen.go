@@ -47,7 +47,6 @@ type (
 		UserId         uint64       `db:"user_id"`         // 创建者ID，关联 users(id)
 		ShortCode      string       `db:"short_code"`      // 短链接码 (e.g., aZ89bC)
 		OriginalUrl    string       `db:"original_url"`    // 原始长链接
-		VisitCount     uint64       `db:"visit_count"`     // 总访问次数 (冗余字段，由报表系统异步更新)
 		IsActive       int64        `db:"is_active"`       // 是否启用 (1=启用, 0=禁用)
 		ExpirationTime sql.NullTime `db:"expiration_time"` // 过期时间 (NULL 为永不过期)
 		CreatedAt      time.Time    `db:"created_at"`      // 创建时间 (微秒精度)
@@ -119,8 +118,8 @@ func (m *defaultLinksModel) Insert(ctx context.Context, data *Links) (sql.Result
 	linksIdKey := fmt.Sprintf("%s%v", cacheLinksIdPrefix, data.Id)
 	linksShortCodeKey := fmt.Sprintf("%s%v", cacheLinksShortCodePrefix, data.ShortCode)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?)", m.table, linksRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.UserId, data.ShortCode, data.OriginalUrl, data.VisitCount, data.IsActive, data.ExpirationTime, data.DeletedAt)
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, linksRowsExpectAutoSet)
+		return conn.ExecCtx(ctx, query, data.UserId, data.ShortCode, data.OriginalUrl, data.IsActive, data.ExpirationTime, data.DeletedAt)
 	}, linksIdKey, linksShortCodeKey)
 	return ret, err
 }
@@ -135,7 +134,7 @@ func (m *defaultLinksModel) Update(ctx context.Context, newData *Links) error {
 	linksShortCodeKey := fmt.Sprintf("%s%v", cacheLinksShortCodePrefix, data.ShortCode)
 	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, linksRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, newData.UserId, newData.ShortCode, newData.OriginalUrl, newData.VisitCount, newData.IsActive, newData.ExpirationTime, newData.DeletedAt, newData.Id)
+		return conn.ExecCtx(ctx, query, newData.UserId, newData.ShortCode, newData.OriginalUrl, newData.IsActive, newData.ExpirationTime, newData.DeletedAt, newData.Id)
 	}, linksIdKey, linksShortCodeKey)
 	return err
 }

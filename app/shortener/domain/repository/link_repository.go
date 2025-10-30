@@ -17,6 +17,4 @@ type LinkRepository interface {
 	Update(ctx context.Context, link *entity.Link) error
 	// Delete 执行软删除
 	Delete(ctx context.Context, link *entity.Link) error
-	// IncrementVisitCount 原子地增加访问计数 (用于后台任务)
-	IncrementVisitCount(ctx context.Context, linkId int64, count uint64) error
 }

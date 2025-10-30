@@ -16,7 +16,6 @@ type Link {
 	Id             int64  `json:"id"`
 	ShortCode      string `json:"shortCode"`
 	OriginalUrl    string `json:"originalUrl"`
-	VisitCount     int64  `json:"visitCount"` // 来自 links.visit_count，由后台异步更新
 	IsActive       bool   `json:"isActive"`
 	ExpirationTime string `json:"expirationTime,optional"` // ISO 8601 格式, e.g., "2025-10-21T08:00:00Z"
 	CreatedAt      string `json:"createdAt"`

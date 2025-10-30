@@ -6,7 +6,6 @@ CREATE TABLE `links` (
                          `user_id` BIGINT UNSIGNED NOT NULL COMMENT '创建者ID，关联 users(id)',
                          `short_code` VARCHAR(16) NOT NULL COMMENT '短链接码 (e.g., aZ89bC)',
                          `original_url` TEXT NOT NULL COMMENT '原始长链接',
-                         `visit_count` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '总访问次数 (冗余字段，由报表系统异步更新)',
                          `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否启用 (1=启用, 0=禁用)',
                          `expiration_time` DATETIME NULL DEFAULT NULL COMMENT '过期时间 (NULL 为永不过期)',
                          `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间 (微秒精度)',

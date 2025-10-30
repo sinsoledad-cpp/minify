@@ -30,8 +30,7 @@ type Link struct {
 	UserID         uint64 // 匹配 PO 类型
 	ShortCode      string
 	OriginalUrl    string
-	VisitCount     uint64 // 匹配 PO 类型
-	IsActive       bool   // 使用 bool 类型更符合领域语义
+	IsActive       bool // 使用 bool 类型更符合领域语义
 	ExpirationTime sql.NullTime
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

@@ -38,7 +38,6 @@ func toModel(e *entity.Link) *model.Links {
 		UserId:         e.UserID,
 		ShortCode:      e.ShortCode,
 		OriginalUrl:    e.OriginalUrl,
-		VisitCount:     e.VisitCount,
 		IsActive:       isActiveInt,
 		ExpirationTime: e.ExpirationTime,
 		CreatedAt:      e.CreatedAt,
@@ -53,7 +52,6 @@ func fromModel(m *model.Links) *entity.Link {
 		UserID:         m.UserId,
 		ShortCode:      m.ShortCode,
 		OriginalUrl:    m.OriginalUrl,
-		VisitCount:     m.VisitCount,
 		IsActive:       m.IsActive == 1,
 		ExpirationTime: m.ExpirationTime,
 		CreatedAt:      m.CreatedAt,
@@ -162,16 +160,4 @@ func (r *linkRepoImpl) Update(ctx context.Context, link *entity.Link) error {
 func (r *linkRepoImpl) Delete(ctx context.Context, link *entity.Link) error {
 	link.MarkDeleted()
 	return r.Update(ctx, link) // 调用自身的 Update
-}
-
-func (r *linkRepoImpl) IncrementVisitCount(ctx context.Context, linkId int64, count uint64) error {
-	// ⭐ 调用 model.IncrementVisitCountAtomic
-	err := r.linksModel.IncrementVisitCountAtomic(ctx, uint64(linkId), count)
-	if err != nil {
-		if errors.Is(err, model.ErrNotFound) {
-			return entity.ErrLinkNotFound
-		} // ⭐ 返回 entity 错误
-		logx.WithContext(ctx).Errorf("linkRepoImpl.IncrementVisitCount error: %v", err)
-	}
-	return err
 }

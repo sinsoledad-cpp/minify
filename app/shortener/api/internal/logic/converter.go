@@ -37,7 +37,6 @@ func (c *Converter) ToTypesLink(e *entity.Link) *types.Link {
 		Id:             e.ID,
 		ShortCode:      c.ShortDomain + "/" + e.ShortCode,
 		OriginalUrl:    e.OriginalUrl,
-		VisitCount:     int64(e.VisitCount), // 类型转换
 		IsActive:       e.IsActive,
 		ExpirationTime: expTime,
 		CreatedAt:      e.CreatedAt.Format(time.RFC3339),

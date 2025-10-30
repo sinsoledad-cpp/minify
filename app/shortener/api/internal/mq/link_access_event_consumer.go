@@ -33,13 +33,6 @@ func (l *LinkAccessEventConsumer) Consume(ctx context.Context, key, val string) 
 		return err // 反序列化失败，返回错误，消息可能会被重试
 	}
 
-	// 1. 异步更新 links 表的 visit_count (原子操作，处理缓存)
-	// (这部分已经在使用 LinkRepo 接口，是正确的)
-	if err := l.svcCtx.LinkRepo.IncrementVisitCount(ctx, event.LinkID, 1); err != nil {
-		// 即使这里失败，我们仍然尝试记录原始日志
-		logx.WithContext(ctx).Errorf("Failed to increment visit count for linkID %d: %v", event.LinkID, err)
-	}
-
 	// 2. ⭐ (已修改) 创建领域实体(Entity)
 	logEntry := entity.NewLinkAccessLog(
 		event.LinkID,
