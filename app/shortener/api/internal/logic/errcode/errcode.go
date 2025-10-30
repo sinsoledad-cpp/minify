@@ -11,9 +11,11 @@ var (
 	ErrInvalidParams           = response.NewBizError(11003, "请求参数无效") // 占位，通常配合 NewBizError(code, msg) 使用
 
 	// --- 链接管理 (11101+) ---
-	ErrCustomCodeExists = response.NewBizError(11101, "自定义短码已存在")
-	ErrLinkExpired      = response.NewBizError(11102, "链接已过期")
-	ErrLinkNotFound     = response.NewBizError(11103, "链接不存在")
+	ErrCustomCodeExists      = response.NewBizError(11101, "自定义短码已存在")
+	ErrLinkExpired           = response.NewBizError(11102, "链接已过期")
+	ErrLinkNotFound          = response.NewBizError(11103, "链接不存在")
+	ErrLinkInactive          = response.NewBizError(11104, "链接未激活")
+	ErrLinkExpiredOrInactive = response.NewBizError(11105, "链接已过期或未激活")
 
 	// --- 内部错误 (11500+) ---
 	ErrInternalError   = response.NewBizError(11500, "服务器内部错误")

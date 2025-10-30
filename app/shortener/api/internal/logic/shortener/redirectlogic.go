@@ -48,7 +48,7 @@ func (l *RedirectLogic) Redirect(req *types.RedirectRequest, ip, ua, referer str
 	// 2. 检查链接是否可用
 	if err := link.CanRedirect(); err != nil {
 		// 例如返回 ErrLinkExpired
-		return "", errcode.ErrLinkExpired
+		return "", errcode.ErrLinkExpiredOrInactive
 	}
 
 	// 3. (TODO) ⭐ 使用 GoSafeCtx 异步发送 Kafka 日志

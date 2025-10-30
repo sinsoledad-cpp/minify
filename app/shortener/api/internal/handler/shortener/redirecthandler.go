@@ -5,7 +5,7 @@ package shortener
 
 import (
 	"errors"
-	"minify/app/shortener/domain/entity"
+	"minify/app/shortener/api/internal/logic/errcode"
 	"net/http"
 	"strings"
 
@@ -35,14 +35,15 @@ func RedirectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		url, err := l.Redirect(&req, ip, ua, referer)
 		if err != nil {
 			// ⭐ 2. 如果是链接不存在，返回 404
-			if errors.Is(err, entity.ErrLinkNotFound) {
+			if errors.Is(err, errcode.ErrLinkNotFound) {
 				http.NotFound(w, r)
-			} else if errors.Is(err, entity.ErrLinkExpired) || errors.Is(err, entity.ErrLinkInactive) {
+			} else if errors.Is(err, errcode.ErrLinkExpiredOrInactive) {
 				// 如果是链接过期或禁用，可以返回 400
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				//http.Error(w, err.Error(), http.StatusBadRequest)
+				response.LogicError(r.Context(), w, err)
 			} else {
 				// 其他错误返回 500
-				httpx.ErrorCtx(r.Context(), w, err)
+				response.LogicError(r.Context(), w, err)
 			}
 		} else {
 			// ⭐ 3. 执行重定向，不再调用 httpx.Ok(w)
