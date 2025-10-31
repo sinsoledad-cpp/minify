@@ -161,3 +161,41 @@ func (r *linkRepoImpl) Delete(ctx context.Context, link *entity.Link) error {
 	link.MarkDeleted()
 	return r.Update(ctx, link) // 调用自身的 Update
 }
+func (r *linkRepoImpl) ListGlobal(ctx context.Context, userId *uint64, status string, page, pageSize int) ([]*entity.Link, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	// ⭐ 1. 调用 model.CountGlobal (我们刚在 linksmodel.go 中创建的)
+	total, err := r.linksModel.CountGlobal(ctx, userId, status)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("linkRepoImpl.ListGlobal Count error: %v", err)
+		if errors.Is(err, model.ErrNotFound) {
+			return []*entity.Link{}, 0, nil
+		}
+		return nil, 0, err
+	}
+	if total == 0 {
+		return []*entity.Link{}, 0, nil
+	}
+
+	// ⭐ 2. 调用 model.FindListGlobal (我们刚在 linksmodel.go 中创建的)
+	pos, err := r.linksModel.FindListGlobal(ctx, userId, status, pageSize, offset)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("linkRepoImpl.ListGlobal FindList error: %v", err)
+		if errors.Is(err, model.ErrNotFound) {
+			return []*entity.Link{}, total, nil
+		}
+		return nil, 0, err
+	}
+
+	links := make([]*entity.Link, len(pos))
+	for i, po := range pos {
+		links[i] = fromModel(po) // 复用 fromModel 转换函数
+	}
+	return links, total, nil
+}
