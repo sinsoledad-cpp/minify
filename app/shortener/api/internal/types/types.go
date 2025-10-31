@@ -24,8 +24,8 @@ type DeleteLinkRequest struct {
 
 type GetAnalyticsRequest struct {
 	Code      string `path:"code"`
-	StartDate string `json:"startDate,optional"` // ISO 8601 日期
-	EndDate   string `json:"endDate,optional"`   // ISO 8601 日期
+	StartDate string `form:"startDate,optional"` // ISO 8601 日期
+	EndDate   string `form:"endDate,optional"`   // ISO 8601 日期
 }
 
 type GetAnalyticsResponse struct {
@@ -40,8 +40,8 @@ type GetAnalyticsResponse struct {
 }
 
 type GetDashboardRequest struct {
-	StartDate string `json:"startDate,optional"`
-	EndDate   string `json:"endDate,optional"`
+	StartDate string `form:"startDate,optional"`
+	EndDate   string `form:"endDate,optional"`
 }
 
 type GetDashboardResponse struct {
@@ -59,10 +59,17 @@ type Link struct {
 	CreatedAt      string `json:"createdAt"`
 }
 
+type ListAllLinksRequest struct {
+	Page     int    `form:"page,optional"`     // 页码, 默认 1
+	PageSize int    `form:"pageSize,optional"` // 每页数量, 默认 20
+	Status   string `form:"status,optional"`   // "active", "expired", "inactive", "all"
+	UserId   uint64 `form:"userId,optional"`   // (Admin) 按用户ID筛选 (0 或不填 = 所有用户)
+}
+
 type ListLinksRequest struct {
-	Page     int    `json:"page,optional"`     // 页码, 默认 1
-	PageSize int    `json:"pageSize,optional"` // 每页数量, 默认 20
-	Status   string `json:"status,optional"`
+	Page     int    `form:"page,optional"`     // 页码, 默认 1
+	PageSize int    `form:"pageSize,optional"` // 每页数量, 默认 20
+	Status   string `form:"status,optional"`
 }
 
 type ListLinksResponse struct {

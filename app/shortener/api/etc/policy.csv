@@ -13,9 +13,9 @@ p, user, /api/v1/analytics/:code, GET
 
 # --- "admin" 角色的权限 ---
 # (假设 admin 拥有 user 的所有权限)
-p, admin, /api/v1/links, POST
-p, admin, /api/v1/links, GET
-p, admin, /api/v1/links/:code, PUT
-p, admin, /api/v1/links/:code, DELETE
-p, admin, /api/v1/analytics/dashboard, GET
-p, admin, /api/v1/analytics/:code, GET
+p, admin, /api/v1/admin/links, GET
+
+# --- 角色继承 (Grouping) ---
+# 关键: "admin" 角色继承 "user" 角色的所有权限
+# Casbin 会自动明白: 凡是 user 能做的，admin 也能做。
+g, admin, user

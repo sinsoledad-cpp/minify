@@ -35,14 +35,14 @@ type CreateLinkResponse {
 
 // --- 列表 (分页) ---
 type ListLinksRequest {
-	Page     int `json:"page,optional"` // 页码, 默认 1
-	PageSize int `json:"pageSize,optional"` // 每页数量, 默认 20
+	Page     int `form:"page,optional"` // 页码, 默认 1
+	PageSize int `form:"pageSize,optional"` // 每页数量, 默认 20
 	// 状态过滤器 (基于我们对索引的优化)
 	// "active" (默认): 仅显示有效的、未过期的
 	// "expired": 仅显示已过期的
 	// "inactive": 仅显示手动禁用的 (is_active = 0)
 	// "all":     显示所有 (不包括软删除的)
-	Status string `json:"status,optional"`
+	Status string `form:"status,optional"`
 }
 
 type ListLinksResponse {
@@ -93,8 +93,8 @@ type ClickPoint {
 // --- 单链接报表 ---
 type GetAnalyticsRequest {
 	Code      string `path:"code"`
-	StartDate string `json:"startDate,optional"` // ISO 8601 日期
-	EndDate   string `json:"endDate,optional"` // ISO 8601 日期
+	StartDate string `form:"startDate,optional"` // ISO 8601 日期
+	EndDate   string `form:"endDate,optional"` // ISO 8601 日期
 }
 
 type GetAnalyticsResponse {
@@ -110,14 +110,22 @@ type GetAnalyticsResponse {
 
 // --- 仪表盘总览 ---
 type GetDashboardRequest {
-	StartDate string `json:"startDate,optional"`
-	EndDate   string `json:"endDate,optional"`
+	StartDate string `form:"startDate,optional"`
+	EndDate   string `form:"endDate,optional"`
 }
 
 type GetDashboardResponse {
 	TotalLinks  int64 `json:"totalLinks"` // 数据源: links 表
 	TotalClicks int64 `json:"totalClicks"` // 数据源: 聚合表
 	TopLink     *Link `json:"topLink,optional"` // 点击量最高的链接 (使用指针)
+}
+
+// --- (新增) Admin 模块类型 ---
+type ListAllLinksRequest {
+	Page     int    `form:"page,optional"` // 页码, 默认 1
+	PageSize int    `form:"pageSize,optional"` // 每页数量, 默认 20
+	Status   string `form:"status,optional"` // "active", "expired", "inactive", "all"
+	UserId   uint64 `form:"userId,optional"` // (Admin) 按用户ID筛选 (0 或不填 = 所有用户)
 }
 
 // -------------------
@@ -166,5 +174,18 @@ service shortener { // 使用简洁的服务名
 	@doc "获取单个链接的详细报表"
 	@handler getAnalytics
 	get /analytics/:code (GetAnalyticsRequest) returns (GetAnalyticsResponse)
+}
+
+// --- (新增) 3. Admin 服务 (链接管理) - 需要 JWT + Admin 权限 ---
+@server (
+	group:      admin // ⭐ 对应 /internal/handler/admin
+	prefix:     /api/v1/admin // ⭐ 使用 /admin 前缀
+	jwt:        Auth
+	middleware: AuthzMiddleware
+)
+service shortener {
+	@doc "获取全站短链接列表 (Admin)"
+	@handler listAllLinks
+	get /links (ListAllLinksRequest) returns (ListLinksResponse) // 复用 ListLinksResponse
 }
 

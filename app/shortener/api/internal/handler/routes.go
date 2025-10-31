@@ -6,6 +6,7 @@ package handler
 import (
 	"net/http"
 
+	admin "minify/app/shortener/api/internal/handler/admin"
 	shortener "minify/app/shortener/api/internal/handler/shortener"
 	"minify/app/shortener/api/internal/svc"
 
@@ -13,6 +14,22 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthzMiddleware},
+			[]rest.Route{
+				{
+					// 获取全站短链接列表 (Admin)
+					Method:  http.MethodGet,
+					Path:    "/links",
+					Handler: admin.ListAllLinksHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin"),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{
