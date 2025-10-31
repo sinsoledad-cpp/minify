@@ -187,5 +187,9 @@ service shortener {
 	@doc "获取全站短链接列表 (Admin)"
 	@handler listAllLinks
 	get /links (ListAllLinksRequest) returns (ListLinksResponse) // 复用 ListLinksResponse
+
+	@doc "获取任意链接的详细报表 (Admin)"
+	@handler getLinkAnalyticsAdmin
+	get /analytics/:code (GetAnalyticsRequest) returns (GetAnalyticsResponse) // 复用 GetAnalyticsRequest/Response
 }
 

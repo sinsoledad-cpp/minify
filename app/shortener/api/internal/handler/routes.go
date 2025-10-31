@@ -19,6 +19,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthzMiddleware},
 			[]rest.Route{
 				{
+					// 获取任意链接的详细报表 (Admin)
+					Method:  http.MethodGet,
+					Path:    "/analytics/:code",
+					Handler: admin.GetLinkAnalyticsAdminHandler(serverCtx),
+				},
+				{
 					// 获取全站短链接列表 (Admin)
 					Method:  http.MethodGet,
 					Path:    "/links",

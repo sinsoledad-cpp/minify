@@ -14,6 +14,7 @@ p, user, /api/v1/analytics/:code, GET
 # --- "admin" 角色的权限 ---
 # (假设 admin 拥有 user 的所有权限)
 p, admin, /api/v1/admin/links, GET
+p, admin, /api/v1/admin/analytics/:code, GET
 
 # --- 角色继承 (Grouping) ---
 # 关键: "admin" 角色继承 "user" 角色的所有权限
