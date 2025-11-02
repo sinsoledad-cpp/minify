@@ -144,7 +144,7 @@ service shortener { // 使用简洁的服务名
 // 2. 认证服务 (链接管理 & 报表) - 需要 JWT
 @server (
 	group:      shortener // 对应 /internal/handler/shortener
-	prefix:     /api/v1 // 使用 API 版本前缀
+	prefix:     /api/v1/shortener // 使用 API 版本前缀
 	jwt:        Auth // 引用 user-api.yaml 中的 Auth 配置
 	middleware: AuthzMiddleware
 )
@@ -179,7 +179,7 @@ service shortener { // 使用简洁的服务名
 // --- (新增) 3. Admin 服务 (链接管理) - 需要 JWT + Admin 权限 ---
 @server (
 	group:      admin // ⭐ 对应 /internal/handler/admin
-	prefix:     /api/v1/admin // ⭐ 使用 /admin 前缀
+	prefix:     /api/v1/admin-shortener // ⭐ 使用 /admin 前缀
 	jwt:        Auth
 	middleware: AuthzMiddleware
 )

@@ -1,6 +1,24 @@
 Name: user
 Host: 0.0.0.0
 Port: 8888
+Log:
+  Mode: console
+  Level: info
+  Stat: false  # <--- 添加这一行
+# ⭐ 新增：CORS 跨域配置
+Cors:
+  Origins:
+    - http://localhost:5173 # 假设你的前端开发服务器地址
+    # - http://127.0.0.1:3000
+    # - "https://your-production-domain.com" # 生产环境的域名
+    # - "*" # (仅限开发时临时使用，允许所有来源)
+    # - http://192.168.1.10:3000  # ⭐ 新增：允许电脑A的前端端口
+    # (如果前端端口不固定，你可以只写 IP)
+    # - http://192.168.1.10
+  Methods: [GET, POST, PUT, DELETE, OPTIONS, PATCH]
+  Headers: [Content-Type, Authorization] # 允许前端发送 Content-Type 和 JWT (Authorization)
+  Credentials: true # 允许跨域时携带 cookie 或 Authorization header
+  MaxAge: 3600
 # ⭐ 新增 JWT Auth 配置
 Auth:
   AccessSecret: "a_secret_key_change_it_later" # 替换为你自己的 Secret

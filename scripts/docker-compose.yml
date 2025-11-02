@@ -20,9 +20,9 @@ services:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: minify
-#    volumes:
-#      - "./mysql/data:/bitnami/mysql/data" # sudo rm -rf mysql ; sudo mkdir mysql && sudo chown -R 1001:1001 mysql
-#      - "./mysql/conf:/opt/bitnami/mysql/conf"
+    volumes:
+      - "./mysql/data:/bitnami/mysql/data" # sudo rm -rf mysql ; sudo mkdir mysql && sudo chown -R 1001:1001 mysql
+      - "./mysql/conf:/opt/bitnami/mysql/conf"
     networks:
       - net01
     healthcheck:
