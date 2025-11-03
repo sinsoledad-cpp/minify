@@ -2,19 +2,20 @@
 
 # --- "user" 角色的权限 ---
 # 链接管理 (CRUD)
-p, user, /api/v1/links, POST
-p, user, /api/v1/links, GET
-p, user, /api/v1/links/:code, PUT
-p, user, /api/v1/links/:code, DELETE
+p, user, /api/v1/shortener/links, POST
+p, user, /api/v1/shortener/links, GET
+p, user, /api/v1/shortener/links/:code, PUT
+p, user, /api/v1/shortener/links/:code, DELETE
 
 # 报表分析
-p, user, /api/v1/analytics/dashboard, GET
-p, user, /api/v1/analytics/:code, GET
+p, user, /api/v1/shortener/analytics/dashboard, GET
+p, user, /api/v1/shortener/analytics/:code, GET
+
 
 # --- "admin" 角色的权限 ---
 # (假设 admin 拥有 user 的所有权限)
-p, admin, /api/v1/admin/links, GET
-p, admin, /api/v1/admin/analytics/:code, GET
+p, admin, /api/v1/admin-shortener/links, GET
+p, admin, /api/v1/admin-shortener/analytics/:code, GET
 
 # --- 角色继承 (Grouping) ---
 # 关键: "admin" 角色继承 "user" 角色的所有权限
