@@ -18,7 +18,8 @@ type (
 	// and implement the added methods in customLinksModel.
 	LinksModel interface {
 		linksModel
-		FindListByUserIdAndStatus(ctx context.Context, userId uint64, status string, limit, offset int) ([]*Links, error)
+		FindListByUserIdAndStatus(ctx context.Context, userId uint64, status string, limit int, offset int, lastCreatedAt time.Time, lastId uint64) ([]*Links, error)
+		//FindListByUserIdAndStatus(ctx context.Context, userId uint64, status string, limit, offset int) ([]*Links, error)
 		CountByUserIdAndStatus(ctx context.Context, userId uint64, status string) (int64, error)
 		RawConn() (sqlx.SqlConn, error)
 		TableName() string // ⭐ 接口中定义大写 T
@@ -43,9 +44,10 @@ func NewLinksModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) L
 	}
 }
 
-// FindListByUserIdAndStatus: 列表查询不走缓存，直接查库
-func (m *customLinksModel) FindListByUserIdAndStatus(ctx context.Context, userId uint64, status string, limit, offset int) ([]*Links, error) {
-	// ... (构建 WHERE 条件和 args 的逻辑不变)
+// FindListByUserIdAndStatus : 列表查询不走缓存，直接查库 ⭐ 修改: 签名变更，并实现混合逻辑
+func (m *customLinksModel) FindListByUserIdAndStatus(ctx context.Context, userId uint64, status string, limit int, offset int, lastCreatedAt time.Time, lastId uint64) ([]*Links, error) {
+
+	// 1. 构建基础 WHERE (不变)
 	baseWhere := "user_id = ? AND deleted_at IS NULL"
 	args := []interface{}{userId}
 	now := time.Now()
@@ -64,12 +66,26 @@ func (m *customLinksModel) FindListByUserIdAndStatus(ctx context.Context, userId
 		args = append(args, now)
 	}
 
-	query := fmt.Sprintf("select %s from %s where %s order by created_at desc limit ? offset ?", linksRows, m.table, baseWhere) // m.table 来自 embedded defaultLinksModel
-	args = append(args, limit, offset)
+	var query string
 
+	// 2. ⭐ 核心：选择分页策略
+	// 如果前端提供了游标 (lastId > 0)，则优先使用游标分页
+	if lastId > 0 && !lastCreatedAt.IsZero() {
+		// 策略一：游标分页 (高性能)
+		baseWhere += " AND (created_at < ? OR (created_at = ? AND id < ?))"
+		args = append(args, lastCreatedAt, lastCreatedAt, lastId)
+
+		query = fmt.Sprintf("select %s from %s where %s order by created_at DESC, id DESC limit ?", linksRows, m.table, baseWhere)
+		args = append(args, limit)
+
+	} else {
+		// 策略二：传统 OFFSET 分页 (用于跳页)
+		query = fmt.Sprintf("select %s from %s where %s order by created_at DESC, id DESC limit ? offset ?", linksRows, m.table, baseWhere)
+		args = append(args, limit, offset)
+	}
+
+	// 3. 执行查询
 	var resp []*Links
-	// ⭐ 使用 m.QueryRowsNoCacheCtx 直接查询数据库
-	// defaultLinksModel 嵌入了 CachedConn，它提供了 QueryRowsNoCacheCtx 方法
 	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, args...)
 	return resp, err
 }

@@ -19,9 +19,11 @@ CREATE TABLE `links` (
     -- 优化索引：用于高性能重定向 (GET /:code)
                          INDEX `idx_redirect` (`short_code`, `deleted_at`, `is_active`),
 
-    -- 优化索引：用于按 "status" (active/inactive) 过滤列表 (GET /links?status=active)
-    -- 这个索引覆盖了 WHERE, ORDER BY, 和 LIMIT，性能最高
-                         INDEX `idx_user_status_sort` (`user_id`, `deleted_at`, `is_active`, `created_at` DESC),
+    -- ⭐ 修改：优化索引，同时支持 C 端游标分页 和 Admin 端 OFFSET 分页
+    -- 覆盖 WHERE(user_id, deleted_at, is_active)
+    -- 覆盖 ORDER BY(created_at DESC, id DESC) [C端游标]
+    -- 覆盖 ORDER BY(created_at DESC) [Admin端OFFSET]
+                         INDEX `idx_user_status_sort_and_cursor` (`user_id`, `deleted_at`, `is_active`, `created_at` DESC, `id` DESC),
 
     -- 优化索引：用于按 "status" (expired) 过滤列表 (GET /links?status=expired)
                          INDEX `idx_user_expiration_sort` (`user_id`, `deleted_at`, `expiration_time`, `created_at` DESC)

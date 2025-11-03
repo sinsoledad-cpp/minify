@@ -43,12 +43,20 @@ type ListLinksRequest {
 	// "inactive": 仅显示手动禁用的 (is_active = 0)
 	// "all":     显示所有 (不包括软删除的)
 	Status string `form:"status,optional"`
+	// ⭐ 新增: 游标分页 (用于 "下一页")
+	// (前端在点击 "下一页" 时应优先使用这两个参数)
+	LastCreatedAt int64 `form:"lastCreatedAt,optional"` // 上一页最后一条的创建时间(毫秒)
+	LastId        int64 `form:"lastId,optional"` // 上一页最后一条的ID
 }
 
 type ListLinksResponse {
 	Links []Link `json:"links"`
 	// 含义：符合该 status 过滤条件的 links 表总记录数 (用于分页)
 	Total int64 `json:"total"`
+	// ⭐ 新增: 游标分页需要的信息
+	NextLastCreatedAt int64 `json:"nextLastCreatedAt,optional"` // 下一页的游标
+	NextLastId        int64 `json:"nextLastId,optional"` // 下一页的游标
+	HasMore           bool  `json:"hasMore"` // 是否还有更多数据
 }
 
 // --- 更新 ---

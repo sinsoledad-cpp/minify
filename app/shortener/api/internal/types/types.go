@@ -67,14 +67,19 @@ type ListAllLinksRequest struct {
 }
 
 type ListLinksRequest struct {
-	Page     int    `form:"page,optional"`     // 页码, 默认 1
-	PageSize int    `form:"pageSize,optional"` // 每页数量, 默认 20
-	Status   string `form:"status,optional"`
+	Page          int    `form:"page,optional"`     // 页码, 默认 1
+	PageSize      int    `form:"pageSize,optional"` // 每页数量, 默认 20
+	Status        string `form:"status,optional"`
+	LastCreatedAt int64  `form:"lastCreatedAt,optional"` // 上一页最后一条的创建时间(毫秒)
+	LastId        int64  `form:"lastId,optional"`        // 上一页最后一条的ID
 }
 
 type ListLinksResponse struct {
-	Links []Link `json:"links"`
-	Total int64  `json:"total"`
+	Links             []Link `json:"links"`
+	Total             int64  `json:"total"`
+	NextLastCreatedAt int64  `json:"nextLastCreatedAt,optional"` // 下一页的游标
+	NextLastId        int64  `json:"nextLastId,optional"`        // 下一页的游标
+	HasMore           bool   `json:"hasMore"`                    // 是否还有更多数据
 }
 
 type RedirectRequest struct {

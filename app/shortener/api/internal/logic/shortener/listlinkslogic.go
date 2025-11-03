@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"minify/common/utils/jwtx"
+	"time"
 
 	"minify/app/shortener/api/internal/svc"
 	"minify/app/shortener/api/internal/types"
@@ -28,7 +29,6 @@ func NewListLinksLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLin
 		svcCtx: svcCtx,
 	}
 }
-
 func (l *ListLinksLogic) ListLinks(req *types.ListLinksRequest) (resp *types.ListLinksResponse, err error) {
 	// 1. 从 JWT Context 获取用户 ID (身份认证)
 	claims, err := jwtx.GetClaimsFromCtx(l.ctx)
@@ -37,12 +37,7 @@ func (l *ListLinksLogic) ListLinks(req *types.ListLinksRequest) (resp *types.Lis
 	}
 	userId := uint64(claims.UserID)
 
-	// 2. 处理分页参数
-	page := req.Page
-	if page <= 0 {
-		page = 1
-	}
-
+	// 2. ⭐ 修改: 处理分页参数
 	pageSize := req.PageSize
 	switch {
 	case pageSize <= 0:
@@ -50,27 +45,90 @@ func (l *ListLinksLogic) ListLinks(req *types.ListLinksRequest) (resp *types.Lis
 	case pageSize > 100:
 		pageSize = 100 // 设置一个合理的最大值
 	}
-	// 3. 调用仓储层(Repository)
-	// 仓储层 link_repo_impl.go 已经实现了按 status 过滤的逻辑
-	links, total, err := l.svcCtx.LinkRepo.ListByUser(l.ctx, userId, req.Status, page, pageSize)
+	// 我们总是请求 N+1 条数据，用于判断 "HasMore"
+	limit := pageSize + 1
+
+	// 3. ⭐ 关键修改：始终查询总数 (Total)
+	// 这样无论前端使用 page 还是 cursor，total 字段始终有值。
+	total, err := l.svcCtx.LinkRepo.CountByUser(l.ctx, userId, req.Status)
+	if err != nil {
+		l.Logger.Errorf("LinkRepo.CountByUser error: %v", err)
+		return nil, errors.New("failed to count links")
+	}
+	if total == 0 {
+		// 如果总数为0，提前返回空结果
+		return &types.ListLinksResponse{
+			Links: []types.Link{},
+			Total: 0,
+			// HasMore 等默认为 false
+		}, nil
+	}
+
+	// 4. ⭐ 修改: 处理游标或 Offset
+	var lastCreatedAt time.Time
+	var lastId uint64
+	var offset int
+
+	// 核心决策：判断使用游标还是OFFSET
+	useCursor := req.LastId > 0 && req.LastCreatedAt > 0
+
+	if useCursor {
+		// --- A. 游标分页路径 (高性能 "下一页") ---
+		lastCreatedAt = time.UnixMilli(req.LastCreatedAt).In(time.Local)
+		lastId = uint64(req.LastId)
+		offset = 0 // 游标模式不使用 offset
+
+	} else {
+		// --- B. 传统分页路径 ("第1页" 或 "跳页") ---
+		page := req.Page
+		if page <= 0 {
+			page = 1
+		}
+		offset = (page - 1) * pageSize
+		// (total 已在步骤 3 中查询)
+	}
+
+	// 5. 调用仓储层(Repository)
+	links, err := l.svcCtx.LinkRepo.ListByUser(l.ctx, userId, req.Status, limit, offset, lastCreatedAt, lastId)
 	if err != nil {
 		l.Logger.Errorf("LinkRepo.ListByUser error: %v", err)
 		return nil, errors.New("failed to list links")
 	}
-	// 4. 将领域实体(Entity)列表转换为 DTO 列表
-	// 我们使用你在 logic/converter.go 中定义的 ToTypesLink 转换器
+
+	// 6. 处理返回结果，判断 HasMore
+	hasMore := false
+	if len(links) == limit {
+		// 请求 N+1 条，返回了 N+1 条，说明有更多
+		hasMore = true
+		// 移除多出来的那一条 (只返回 N 条)
+		links = links[:pageSize]
+	}
+
+	var nextLastCreatedAt int64
+	var nextLastId int64
+
+	// 7. 将领域实体(Entity)列表转换为 DTO 列表
 	dtoLinks := make([]types.Link, len(links))
 	for i, linkEntity := range links {
-		// 注意：converter 在上一级 logic 包中
 		dtoLink := l.svcCtx.Converter.ToTypesLink(linkEntity)
 		if dtoLink != nil {
 			dtoLinks[i] = *dtoLink
 		}
 	}
 
-	// 5. 返回响应
+	// 8. 计算下一个游标 (无论哪种模式都计算)
+	if len(links) > 0 {
+		lastEntity := links[len(links)-1]
+		nextLastCreatedAt = lastEntity.CreatedAt.UnixMilli()
+		nextLastId = lastEntity.ID
+	}
+
+	// 9. ⭐ 修改: 返回响应
 	return &types.ListLinksResponse{
-		Links: dtoLinks,
-		Total: total, // total 是符合过滤条件的总记录数，由仓储层 CountByUserIdAndStatus 返回
+		Links:             dtoLinks,
+		Total:             total, // ⭐ 解决: total 现在总是有值
+		HasMore:           hasMore,
+		NextLastCreatedAt: nextLastCreatedAt,
+		NextLastId:        nextLastId,
 	}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"minify/app/shortener/data/model" // ⭐ 依赖 data/model
 	"minify/app/shortener/domain/entity"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -105,43 +106,38 @@ func (r *linkRepoImpl) FindByID(ctx context.Context, id int64) (*entity.Link, er
 	return fromModel(po), nil // ⭐ 使用辅助函数
 }
 
-func (r *linkRepoImpl) ListByUser(ctx context.Context, userId uint64, status string, page, pageSize int) ([]*entity.Link, int64, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	offset := (page - 1) * pageSize
+// ListByUser ⭐ 修改: ListByUser 签名变更
+func (r *linkRepoImpl) ListByUser(ctx context.Context, userId uint64, status string, limit int, offset int, lastCreatedAt time.Time, lastId uint64) ([]*entity.Link, error) {
 
-	// ⭐ 调用 model.CountByUserIdAndStatus
-	total, err := r.linksModel.CountByUserIdAndStatus(ctx, userId, status)
-	if err != nil {
-		logx.WithContext(ctx).Errorf("linkRepoImpl.ListByUser Count error: %v", err)
-		if errors.Is(err, model.ErrNotFound) {
-			return []*entity.Link{}, 0, nil
-		}
-		return nil, 0, err
-	}
-	if total == 0 {
-		return []*entity.Link{}, 0, nil
-	}
-
-	// ⭐ 调用 model.FindListByUserIdAndStatus
-	pos, err := r.linksModel.FindListByUserIdAndStatus(ctx, userId, status, pageSize, offset)
+	// ⭐ 修改: 调用新的 model 方法 (传递所有参数)
+	pos, err := r.linksModel.FindListByUserIdAndStatus(ctx, userId, status, limit, offset, lastCreatedAt, lastId)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("linkRepoImpl.ListByUser FindList error: %v", err)
 		if errors.Is(err, model.ErrNotFound) {
-			return []*entity.Link{}, total, nil
+			return []*entity.Link{}, nil // ⭐ 返回空列表，不是错误
 		}
-		return nil, 0, err
+		return nil, err // ⭐ 返回真实错误
 	}
 
 	links := make([]*entity.Link, len(pos))
 	for i, po := range pos {
 		links[i] = fromModel(po) // ⭐ 使用辅助函数
 	}
-	return links, total, nil
+
+	return links, nil
+}
+
+// CountByUser ⭐ 新增: CountByUser 实现
+func (r *linkRepoImpl) CountByUser(ctx context.Context, userId uint64, status string) (int64, error) {
+	total, err := r.linksModel.CountByUserIdAndStatus(ctx, userId, status)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("linkRepoImpl.CountByUser error: %v", err)
+		if errors.Is(err, model.ErrNotFound) {
+			return 0, nil // 找不到算 0
+		}
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *linkRepoImpl) Update(ctx context.Context, link *entity.Link) error {
