@@ -23,7 +23,6 @@ type (
 		CountByUserIdAndStatus(ctx context.Context, userId uint64, status string) (int64, error)
 		RawConn() (sqlx.SqlConn, error)
 		TableName() string // ⭐ 接口中定义大写 T
-		// --- (新增) ---
 		// FindListGlobal 按可选的 userId 和 status 分页查询 (nil userId = 查询所有)
 		FindListGlobal(ctx context.Context, userId *uint64, status string, limit, offset int) ([]*Links, error)
 		// CountGlobal 按可选的 userId 和 status 统计 (nil userId = 查询所有)
@@ -90,7 +89,7 @@ func (m *customLinksModel) FindListByUserIdAndStatus(ctx context.Context, userId
 	return resp, err
 }
 
-// CountByUserIdAndStatus: 计数查询不走缓存，直接查库
+// CountByUserIdAndStatus 计数查询不走缓存，直接查库
 func (m *customLinksModel) CountByUserIdAndStatus(ctx context.Context, userId uint64, status string) (int64, error) {
 	// ... (构建 WHERE 条件和 args 的逻辑不变)
 	baseWhere := "user_id = ? AND deleted_at IS NULL"
@@ -119,7 +118,7 @@ func (m *customLinksModel) CountByUserIdAndStatus(ctx context.Context, userId ui
 	return count, err
 }
 
-// ⭐ 实现 RawConn (通过嵌入的 defaultLinksModel)
+// 实现 RawConn (通过嵌入的 defaultLinksModel)
 func (m *customLinksModel) RawConn() (sqlx.SqlConn, error) {
 	if m.rawConn == nil {
 		return nil, errors.New("raw connection is not available")
@@ -127,12 +126,12 @@ func (m *customLinksModel) RawConn() (sqlx.SqlConn, error) {
 	return m.rawConn, nil
 }
 
-// ⭐ 实现大写的 TableName() 方法 它内部调用嵌入的、小写的 tableName() 方法
+// 实现大写的 TableName() 方法 它内部调用嵌入的、小写的 tableName() 方法
 func (m *customLinksModel) TableName() string {
 	return m.defaultLinksModel.tableName() // 调用嵌入的未导出方法
 }
 
-// (新增) buildGlobalWhere 构建全局查询的 WHERE 子句
+// buildGlobalWhere 构建全局查询的 WHERE 子句
 func (m *customLinksModel) buildGlobalWhere(ctx context.Context, userId *uint64, status string) (string, []interface{}) {
 	// 基础条件：未软删除
 	baseWhere := "deleted_at IS NULL"
@@ -166,13 +165,24 @@ func (m *customLinksModel) buildGlobalWhere(ctx context.Context, userId *uint64,
 	return baseWhere, args
 }
 
-// (新增) FindListGlobal: 列表查询不走缓存，直接查库
+// FindListGlobal  列表查询不走缓存，直接查库 这里是方案二（延迟关联）
 func (m *customLinksModel) FindListGlobal(ctx context.Context, userId *uint64, status string, limit, offset int) ([]*Links, error) {
 	// 调用辅助函数构建查询
 	whereClause, args := m.buildGlobalWhere(ctx, userId, status)
 
-	query := fmt.Sprintf("select %s from %s where %s order by created_at desc limit ? offset ?", linksRows, m.table, whereClause)
+	// --- 方案二：延迟关联 ---
+
+	// 1. 子查询：仅使用覆盖索引 `idx_user_status_cursor` 快速定位 ID。
+	//    我们使用 `created_at DESC, id DESC` 来 100% 匹配索引顺序。
+	subQuery := fmt.Sprintf("SELECT id FROM %s WHERE %s ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?", m.table, whereClause)
+
+	// 2. 主查询：JOIN 子查询的结果，只拉取目标页的完整数据。
+	//    我们必须在外部再次 ORDER BY，以保证最终结果的顺序。
+	query := fmt.Sprintf("SELECT t1.* FROM %s AS t1 JOIN (%s) AS t2 ON t1.id = t2.id ORDER BY t1.created_at DESC, t1.id DESC", m.table, subQuery)
+
+	// 3. 将 limit 和 offset 添加到 args (它们是给子查询用的)
 	args = append(args, limit, offset)
+	// --- 结束 ---
 
 	var resp []*Links
 	// 使用 m.QueryRowsNoCacheCtx 直接查询数据库
@@ -180,7 +190,7 @@ func (m *customLinksModel) FindListGlobal(ctx context.Context, userId *uint64, s
 	return resp, err
 }
 
-// (新增) CountGlobal: 计数查询不走缓存，直接查库
+// CountGlobal  计数查询不走缓存，直接查库
 func (m *customLinksModel) CountGlobal(ctx context.Context, userId *uint64, status string) (int64, error) {
 	// 调用辅助函数构建查询
 	whereClause, args := m.buildGlobalWhere(ctx, userId, status)
